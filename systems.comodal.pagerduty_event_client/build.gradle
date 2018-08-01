@@ -1,0 +1,32 @@
+
+apply plugin: 'com.jfrog.bintray'
+
+ext {
+  desc = 'Pagerduty Event Client'
+  moduleName = 'systems.comodal.pagerduty_event_client'
+}
+
+bintray {
+  user = project.hasProperty("bintrayUser") ? bintrayUser : System.getenv('BINTRAY_USER')
+  key = project.hasProperty("bintrayApiKey") ? bintrayApiKey : System.getenv('BINTRAY_API_KEY')
+  publications = ['mavenJava']
+  pkg {
+    userOrg = project.bintrayOrg
+    repo = project.bintrayRepo
+    name = project.name
+    desc = project.desc
+    vcsUrl = project.vcsUrl
+    websiteUrl = project.vcsUrl
+    issueTrackerUrl = project.vcsUrl + '/issues'
+    licenses = ["Apache-2.0"]
+    publish = true
+    version {
+      name = project.version
+      vcsTag = project.name + '-' + project.version
+      gpg {
+        sign = true
+        passphrase = project.hasProperty("bintrayGPGPassphrase") ? bintrayGPGPassphrase : System.getenv('BINTRAY_GPG_PASSPHRASE')
+      }
+    }
+  }
+}

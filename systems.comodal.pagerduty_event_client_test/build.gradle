@@ -1,0 +1,8 @@
+ext.moduleName = 'systems.comodal.pagerduty_event_client_test'
+
+dependencies {
+  compile project(':pagerduty-event-client')
+
+  compile 'org.junit.jupiter:junit-jupiter-api:+'
+  runtimeOnly 'org.junit.jupiter:junit-jupiter-engine:+'
+}
