@@ -1,7 +1,7 @@
 package systems.comodal.pagerduty.event.data;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -85,7 +85,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
         + "\",\"timestamp\":\"" + timestamp
         + (component == null ? "\"" : "\",\"component\":\"" + component + '"')
         + (group == null ? "" : ",\"group\":\"" + group + '"')
-        + (type == null ? "" : ",\"type\":\"" + type + '"')
+        + (type == null ? "" : ",\"class\":\"" + type + '"')
         + (customDetails.isEmpty() ? "" : ",\"custom_details\":" + toJson(customDetails))
         + "}";
   }
@@ -189,7 +189,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
     private Builder customDetailsObject(final String field, final Object fieldValue) {
       if (customDetails == null) {
-        customDetails = new HashMap<>();
+        customDetails = new LinkedHashMap<>();
       }
       customDetails.put(field, fieldValue);
       return this;
@@ -244,7 +244,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     public Map<String, Object> getCustomDetails() {
       return customDetails == null
           ? Map.of()
-          : Map.copyOf(customDetails);
+          : customDetails;
     }
 
     @Override
