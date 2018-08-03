@@ -3,4 +3,6 @@ module systems.comodal.pagerduty_event_client_test {
   requires transitive jdk.httpserver;
   requires org.junit.jupiter.api;
   requires org.opentest4j;
+
+  uses systems.comodal.test.pagerduty.ClientTest;
 }

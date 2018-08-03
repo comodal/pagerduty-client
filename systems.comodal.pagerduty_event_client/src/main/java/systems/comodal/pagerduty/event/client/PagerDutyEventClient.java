@@ -16,6 +16,18 @@ public interface PagerDutyEventClient {
 
   String getDefaultRoutingKey();
 
+  default CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String dedupeKey) {
+    return acknowledgeEvent(getDefaultRoutingKey(), dedupeKey);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupeKey);
+
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey) {
+    return resolveEvent(getDefaultRoutingKey(), dedupeKey);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupeKey);
+
   default CompletableFuture<PagerDutyEventResponse> triggerDefaultRouteEvent(final PagerDutyEventPayload payload) {
     return triggerEvent(getDefaultRoutingKey(), null, payload, List.of(), List.of());
   }

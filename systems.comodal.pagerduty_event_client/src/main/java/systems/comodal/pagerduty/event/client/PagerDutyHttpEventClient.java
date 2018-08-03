@@ -58,6 +58,25 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
   }
 
   @Override
+  public CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupeKey) {
+    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"acknowledge\"}");
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupeKey) {
+    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"resolve\"}");
+  }
+
+  private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey, final String dedupeKey, final String actionBody) {
+    Objects.requireNonNull(routingKey, "Routing key is a required field.");
+    Objects.requireNonNull(dedupeKey, "De-duplication key is a required field.");
+    final var json = "{\"routing_key\":\"" + routingKey
+        + "\",\"dedup_key\":\"" + dedupeKey
+        + actionBody;
+    return createAndSendRequest(json);
+  }
+
+  @Override
   public CompletableFuture<PagerDutyEventResponse> triggerEvent(final String clientName,
                                                                 final String clientUrl,
                                                                 final String routingKey,
@@ -86,13 +105,20 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
         + linksJson
         + "}";
 
-    final var request = HttpRequest.newBuilder(eventUriPath)
+    return createAndSendRequest(json);
+  }
+
+  private HttpRequest createRequest(final String jsonBody) {
+    return HttpRequest.newBuilder(eventUriPath)
         .headers(
             "Authorization", authTokenHeaderVal,
             "Accept", "application/vnd.pagerduty+json;version=2",
             "Content-Type", "application/json")
-        .POST(fromString(json, UTF_8)).build();
-    return httpClient.sendAsync(request, asInputStream())
+        .POST(fromString(jsonBody, UTF_8)).build();
+  }
+
+  private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String jsonBody) {
+    return httpClient.sendAsync(createRequest(jsonBody), asInputStream())
         .thenApplyAsync(adapter::adaptResponse);
   }
 

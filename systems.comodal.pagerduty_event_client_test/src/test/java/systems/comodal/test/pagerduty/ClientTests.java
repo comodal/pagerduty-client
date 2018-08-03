@@ -30,11 +30,12 @@ final class ClientTests {
   private ClientTests() {
   }
 
-  static <C> DynamicTest createTest(final ClientTest<C> test) {
+  static DynamicTest createTest(final ClientTest<?> test) {
     return dynamicTest(test.getClass().getSimpleName(), () -> runTest(test));
   }
 
-  static <C> DynamicTest createTest(final ServiceLoader.Provider<? extends ClientTest<C>> testProvider) {
+  @SuppressWarnings("unchecked")
+  static DynamicTest createTest(final ServiceLoader.Provider<ClientTest> testProvider) {
     return dynamicTest(testProvider.type().getSimpleName(), () -> runTest(testProvider.get()));
   }
 

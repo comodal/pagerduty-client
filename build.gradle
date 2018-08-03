@@ -92,7 +92,7 @@ subprojects {
             '--add-modules', 'ALL-MODULE-PATH',
             '--add-reads', "$moduleName=org.junit.jupiter.api,jdk.httpserver",
             '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
-            '--add-opens', "$moduleName/systems.comodal.test.xclient=org.junit.platform.commons,"
+            '--add-opens', "$moduleName/systems.comodal.test.pagerduty=org.junit.platform.commons"
           ]
           classpath = files()
         }

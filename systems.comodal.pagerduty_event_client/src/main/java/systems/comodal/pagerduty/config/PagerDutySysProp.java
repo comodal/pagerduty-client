@@ -3,8 +3,8 @@ package systems.comodal.pagerduty.config;
 public enum PagerDutySysProp implements SysProp {
 
   DEBUG(".debug"),
-
   PAGER_DUTY_EVENT_CLIENT_ENDPOINT(".event_client_endpoint"),
+
   PAGER_DUTY_EVENT_CLIENT_URL(".event_client_url"),
   PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY(".event_client_routing_key"),
   PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN(".event_client_auth_token"),
