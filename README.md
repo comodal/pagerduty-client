@@ -1,5 +1,7 @@
 # PagerDuty Event Client [![Build Status](https://travis-ci.org/comodal/pagerduty-client.svg?branch=master)](https://travis-ci.org/comodal/pagerduty-client) [![Download](https://api.bintray.com/packages/comodal/libraries/pagerduty-event-client/images/download.svg)](https://bintray.com/comodal/libraries/pagerduty-event-client/_latestVersion)
 
+This client aims to be compliant with the latest [PagerDuty Event API](https://v2.developer.pagerduty.com/docs/events-api-v2), currently V2.
+
 ## Configuration
 Configuration is handled via system properties namespaced by a client name.  See [PagerDutySysProp.java](systems.comodal.pagerduty_event_client/src/main/java/systems/comodal/pagerduty/config/PagerDutySysProp.java) for all available system properties.
 
