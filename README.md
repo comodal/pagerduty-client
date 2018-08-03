@@ -1,14 +1,12 @@
-# PagerDuty Event Client
+# PagerDuty Event Client [![Build Status](https://travis-ci.org/comodal/pagerduty-client.svg?branch=master)](https://travis-ci.org/comodal/pagerduty-client)  [![Codecov](https://codecov.io/gh/comodal/pagerduty-client/branch/master/graph/badge.svg)](https://codecov.io/gh/comodal/pagerduty-client) [![Download](https://api.bintray.com/packages/comodal/libraries/pagerduty-client/images/download.svg)](https://bintray.com/comodal/libraries/pagerduty-client/_latestVersion)
 
-#### Configuration
+## Configuration
 Configuration is handled via system properties namespaced by a client name.  See [PagerDutySysProp.java](systems.comodal.pagerduty_event_client/src/main/java/systems/comodal/pagerduty/config/PagerDutySysProp.java) for all available system properties.
 
  - -Dsystems.comodal.pagerduty.{CLIENT_NAME}.event_client_routing_key={INTEGRATION_KEY}
  - -Dsystems.comodal.pagerduty.{CLIENT_NAME}.event_client_auth_token={AUTH_TOKEN}
 
-
-
-#### Hello Event Trigger
+## Hello Event Trigger
 
 ```java
 var clientName = "client-name";
