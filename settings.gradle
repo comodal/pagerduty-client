@@ -5,3 +5,5 @@ project(':systems.comodal.pagerduty_event_client').name = 'pagerduty-event-clien
 
 include 'systems.comodal.pagerduty_event_client_test'
 project(':systems.comodal.pagerduty_event_client_test').name = 'pagerduty-event-client-test'
+
+enableFeaturePreview('STABLE_PUBLISHING')
