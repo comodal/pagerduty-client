@@ -1,6 +1,7 @@
 package systems.comodal.pagerduty.event.data;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
 public interface PagerDutyEventPayload {
@@ -25,7 +26,11 @@ public interface PagerDutyEventPayload {
 
   Map<String, Object> getCustomDetails();
 
-  String toJson();
+  List<PagerDutyLinkRef> getLinks();
+
+  List<PagerDutyImageRef> getImages();
+
+  String getPayloadJson();
 
   interface Builder extends PagerDutyEventPayload {
 
@@ -48,5 +53,9 @@ public interface PagerDutyEventPayload {
     Builder customDetails(final String field, final String fieldValue);
 
     Builder customDetails(final String field, final Number fieldValue);
+
+    Builder link(final PagerDutyLinkRef link);
+
+    Builder image(final PagerDutyImageRef image);
   }
 }

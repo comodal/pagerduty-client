@@ -11,7 +11,6 @@ import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapterFactory;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -81,19 +80,17 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
                                                                 final String clientUrl,
                                                                 final String routingKey,
                                                                 final String dedupeKey,
-                                                                final PagerDutyEventPayload payload,
-                                                                final List<PagerDutyImageRef> images,
-                                                                final List<PagerDutyLinkRef> links) {
+                                                                final PagerDutyEventPayload payload) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
 
-    final var payloadJson = payload.toJson();
-    final var imagesJson = images.isEmpty()
+    final var payloadJson = payload.getPayloadJson();
+    final var imagesJson = payload.getImages().isEmpty()
         ? ""
-        : images.stream().map(PagerDutyImageRef::toJson)
+        : payload.getImages().stream().map(PagerDutyImageRef::toJson)
         .collect(Collectors.joining(",", ",\"images\":[", "]"));
-    final var linksJson = links.isEmpty()
+    final var linksJson = payload.getLinks().isEmpty()
         ? ""
-        : links.stream().map(PagerDutyLinkRef::toJson)
+        : payload.getLinks().stream().map(PagerDutyLinkRef::toJson)
         .collect(Collectors.joining(",", ",\"links\":[", "]"));
 
     final var json = "{\"event_action\":\"trigger\",\"payload\":" + payloadJson

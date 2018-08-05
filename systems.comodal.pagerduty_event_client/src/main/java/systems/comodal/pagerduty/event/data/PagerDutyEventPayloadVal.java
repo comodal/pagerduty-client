@@ -1,9 +1,7 @@
 package systems.comodal.pagerduty.event.data;
 
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
@@ -18,6 +16,8 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
   private final String group;
   private final String type;
   private final Map<String, Object> customDetails;
+  private final List<PagerDutyLinkRef> links;
+  private final List<PagerDutyImageRef> images;
 
   private PagerDutyEventPayloadVal(final String summary,
                                    final String source,
@@ -26,7 +26,9 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
                                    final String component,
                                    final String group,
                                    final String type,
-                                   final Map<String, Object> customDetails) {
+                                   final Map<String, Object> customDetails,
+                                   final List<PagerDutyLinkRef> links,
+                                   final List<PagerDutyImageRef> images) {
     this.summary = summary;
     this.source = source;
     this.severity = severity;
@@ -35,6 +37,8 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     this.group = group;
     this.type = type;
     this.customDetails = customDetails;
+    this.links = links;
+    this.images = images;
   }
 
   @Override
@@ -78,7 +82,17 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
   }
 
   @Override
-  public String toJson() {
+  public List<PagerDutyLinkRef> getLinks() {
+    return links;
+  }
+
+  @Override
+  public List<PagerDutyImageRef> getImages() {
+    return images;
+  }
+
+  @Override
+  public String getPayloadJson() {
     return "{\"summary\":\"" + summary
         + "\",\"source\":\"" + source
         + "\",\"severity\":\"" + severity
@@ -130,6 +144,8 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     private String group;
     private String type;
     private Map<String, Object> customDetails;
+    private List<PagerDutyLinkRef> links = List.of();
+    private List<PagerDutyImageRef> images = List.of();
 
     PagerDutyEventPayloadBuilder() {
     }
@@ -142,7 +158,9 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
           Objects.requireNonNull(severity, "Severity is a required payload field."),
           timestamp == null ? ZonedDateTime.now(UTC) : timestamp,
           component, group, type,
-          getCustomDetails());
+          getCustomDetails(),
+          links,
+          images);
     }
 
     @Override
@@ -206,6 +224,32 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     }
 
     @Override
+    public Builder link(final PagerDutyLinkRef link) {
+      if (links.isEmpty()) {
+        links = List.of(link);
+        return this;
+      }
+      if (links.size() == 1) {
+        links = new ArrayList<>(links);
+      }
+      links.add(link);
+      return this;
+    }
+
+    @Override
+    public Builder image(final PagerDutyImageRef image) {
+      if (images.isEmpty()) {
+        images = List.of(image);
+        return this;
+      }
+      if (images.size() == 1) {
+        images = new ArrayList<>(images);
+      }
+      images.add(image);
+      return this;
+    }
+
+    @Override
     public String getSummary() {
       return summary;
     }
@@ -248,7 +292,17 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     }
 
     @Override
-    public String toJson() {
+    public List<PagerDutyLinkRef> getLinks() {
+      return links;
+    }
+
+    @Override
+    public List<PagerDutyImageRef> getImages() {
+      return images;
+    }
+
+    @Override
+    public String getPayloadJson() {
       return "{\"summary\":\"" + summary
           + "\",\"source\":\"" + source
           + "\",\"severity\":\"" + severity
@@ -262,12 +316,12 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
     @Override
     public String toString() {
-      return toJson();
+      return getPayloadJson();
     }
   }
 
   @Override
   public String toString() {
-    return toJson();
+    return getPayloadJson();
   }
 }
