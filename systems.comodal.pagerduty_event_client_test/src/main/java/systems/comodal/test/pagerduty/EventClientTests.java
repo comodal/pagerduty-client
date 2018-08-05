@@ -2,10 +2,7 @@ package systems.comodal.test.pagerduty;
 
 import com.sun.net.httpserver.HttpHandler;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
-import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
-import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
-import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
-import systems.comodal.pagerduty.event.data.PagerDutySeverity;
+import systems.comodal.pagerduty.event.data.*;
 
 import java.time.ZonedDateTime;
 import java.util.function.BiConsumer;
@@ -39,7 +36,8 @@ public final class EventClientTests implements EventClientTest {
             "\"custom_details\":{\"test-num-metric\":1,\"test-string-metric\":\"val\"}" +
             "},\"routing_key\":\"" + routingKey +
             "\",\"client\":\"" + clientName +
-            "\",\"links\":[{\"href\":\"https://github.com/comodal/pagerduty-client\",\"text\":\"Github pagerduty-client\"}]}", body);
+            "\",\"images\":[{\"src\":\"https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png\",\"href\":\"https://www.pagerduty.com/\",\"alt\":\"pagerduty\"}]" +
+            ",\"links\":[{\"href\":\"https://github.com/comodal/pagerduty-client\",\"text\":\"Github pagerduty-client\"}]}", body);
         writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\"}");
         return;
       }
@@ -72,7 +70,15 @@ public final class EventClientTests implements EventClientTest {
         .type("test-class")
         .customDetails("test-num-metric", 1)
         .customDetails("test-string-metric", "val")
-        .link(PagerDutyLinkRef.build().href("https://github.com/comodal/pagerduty-client").text("Github pagerduty-client").create())
+        .link(PagerDutyLinkRef.build()
+            .href("https://github.com/comodal/pagerduty-client")
+            .text("Github pagerduty-client")
+            .create())
+        .image(PagerDutyImageRef.build()
+            .src("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png")
+            .href("https://www.pagerduty.com/")
+            .alt("pagerduty")
+            .create())
         .create();
 
     final var response = client.triggerDefaultRouteEvent(payload).join();

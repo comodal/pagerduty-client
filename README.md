@@ -26,7 +26,13 @@ var payload = PagerDutyEventPayload.build()
     .customDetails("string-metric", "val")
     .link(PagerDutyLinkRef.build()
       .href("https://github.com/comodal/pagerduty-client")
-      .text("Github pagerduty-client").create())
+      .text("Github pagerduty-client")
+      .create())
+    .image(PagerDutyImageRef.build()
+      .src("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png")
+      .href("https://www.pagerduty.com/")
+      .alt("pagerduty")
+      .create())
     .create();
 
 var triggerResponse = client.triggerDefaultRouteEvent(payload).join();

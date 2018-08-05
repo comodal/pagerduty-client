@@ -2,6 +2,7 @@ package systems.comodal.test.pagerduty;
 
 import systems.comodal.pagerduty.event.client.PagerDutyEventClientFactory;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
+import systems.comodal.pagerduty.event.data.PagerDutyImageRef;
 import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
 import systems.comodal.pagerduty.event.data.PagerDutySeverity;
 
@@ -37,7 +38,13 @@ public final class Integ {
         .customDetails("test-string-metric", "val")
         .link(PagerDutyLinkRef.build()
             .href("https://github.com/comodal/pagerduty-client")
-            .text("Github pagerduty-client").create())
+            .text("Github pagerduty-client")
+            .create())
+        .image(PagerDutyImageRef.build()
+            .src("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png")
+            .href("https://www.pagerduty.com/")
+            .alt("pagerduty")
+            .create())
         .create();
 
     final var triggerResponse = client.triggerDefaultRouteEvent(payload).join();
