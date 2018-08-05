@@ -2,6 +2,7 @@ package systems.comodal.test.pagerduty;
 
 import systems.comodal.pagerduty.event.client.PagerDutyEventClientFactory;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
+import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
 import systems.comodal.pagerduty.event.data.PagerDutySeverity;
 
 import java.time.ZonedDateTime;
@@ -34,6 +35,9 @@ public final class Integ {
         .type("test-class")
         .customDetails("test-num-metric", 1)
         .customDetails("test-string-metric", "val")
+        .link(PagerDutyLinkRef.build()
+            .href("https://github.com/comodal/pagerduty-client")
+            .text("Github pagerduty-client").create())
         .create();
 
     final var triggerResponse = client.triggerDefaultRouteEvent(payload).join();

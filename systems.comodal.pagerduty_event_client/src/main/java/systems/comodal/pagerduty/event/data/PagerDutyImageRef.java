@@ -15,7 +15,7 @@ public interface PagerDutyImageRef {
   default String toJson() {
     return "{\"src\":\"" + getSrc()
         + "\",\"href\":\"" + getHref()
-        + "\",\"alt\":\"" + getAlt() + "}";
+        + "\",\"alt\":\"" + getAlt() + "\"}";
   }
 
   interface Builder extends PagerDutyImageRef {

@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpHandler;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
+import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
 import systems.comodal.pagerduty.event.data.PagerDutySeverity;
 
 import java.time.ZonedDateTime;
@@ -38,7 +39,7 @@ public final class EventClientTests implements EventClientTest {
             "\"custom_details\":{\"test-num-metric\":1,\"test-string-metric\":\"val\"}" +
             "},\"routing_key\":\"" + routingKey +
             "\",\"client\":\"" + clientName +
-            "\"}", body);
+            "\",\"links\":[{\"href\":\"https://github.com/comodal/pagerduty-client\",\"text\":\"Github pagerduty-client\"}]}", body);
         writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\"}");
         return;
       }
@@ -71,6 +72,7 @@ public final class EventClientTests implements EventClientTest {
         .type("test-class")
         .customDetails("test-num-metric", 1)
         .customDetails("test-string-metric", "val")
+        .link(PagerDutyLinkRef.build().href("https://github.com/comodal/pagerduty-client").text("Github pagerduty-client").create())
         .create();
 
     final var response = client.triggerDefaultRouteEvent(payload).join();

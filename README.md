@@ -24,6 +24,9 @@ var payload = PagerDutyEventPayload.build()
     .type("class")
     .customDetails("num-metric", 1)
     .customDetails("string-metric", "val")
+    .link(PagerDutyLinkRef.build()
+      .href("https://github.com/comodal/pagerduty-client")
+      .text("Github pagerduty-client").create())
     .create();
 
 var triggerResponse = client.triggerDefaultRouteEvent(payload).join();

@@ -11,7 +11,7 @@ public interface PagerDutyLinkRef {
   String getText();
 
   default String toJson() {
-    return "{\"href\":\"" + getHref() + "\",\"text\":\"" + getText() + "}";
+    return "{\"href\":\"" + getHref() + "\",\"text\":\"" + getText() + "\"}";
   }
 
   interface Builder extends PagerDutyLinkRef {
