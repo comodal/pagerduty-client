@@ -1,7 +1,5 @@
 package systems.comodal.pagerduty.event.client;
 
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
 import systems.comodal.pagerduty.client.PagerDutyHttpClientProvider;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
@@ -11,13 +9,15 @@ import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapterFactory;
 
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
+import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static jdk.incubator.http.HttpRequest.BodyPublisher.fromString;
-import static jdk.incubator.http.HttpResponse.BodyHandler.asInputStream;
 import static systems.comodal.pagerduty.config.PagerDutySysProp.*;
 
 final class PagerDutyHttpEventClient implements PagerDutyEventClient {
@@ -111,11 +111,12 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
             "Authorization", authTokenHeaderVal,
             "Accept", "application/vnd.pagerduty+json;version=2",
             "Content-Type", "application/json")
-        .POST(fromString(jsonBody, UTF_8)).build();
+
+        .POST(ofString(jsonBody, UTF_8)).build();
   }
 
   private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String jsonBody) {
-    return httpClient.sendAsync(createRequest(jsonBody), asInputStream())
+    return httpClient.sendAsync(createRequest(jsonBody), ofInputStream())
         .thenApplyAsync(adapter::adaptResponse);
   }
 

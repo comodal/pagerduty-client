@@ -1,6 +1,5 @@
 module systems.comodal.pagerduty_event_client {
-  // requires java.net.http;
-  requires jdk.incubator.httpclient;
+  requires java.net.http;
   requires systems.comodal.json_iterator;
 
   exports systems.comodal.pagerduty.client;

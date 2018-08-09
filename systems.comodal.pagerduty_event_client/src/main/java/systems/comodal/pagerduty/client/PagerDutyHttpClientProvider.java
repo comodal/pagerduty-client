@@ -1,7 +1,6 @@
 package systems.comodal.pagerduty.client;
 
-import jdk.incubator.http.HttpClient;
-
+import java.net.http.HttpClient;
 import java.util.ServiceLoader;
 
 import static systems.comodal.pagerduty.config.PagerDutySysProp.PAGER_DUTY_HTTP_CLIENT_PROVIDER;

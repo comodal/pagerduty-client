@@ -1,6 +1,5 @@
 package systems.comodal.pagerduty.event.data.adapters;
 
-import jdk.incubator.http.HttpResponse;
 import systems.comodal.jsoniter.JsonException;
 import systems.comodal.jsoniter.JsonIterator;
 import systems.comodal.pagerduty.config.PagerDutySysProp;
@@ -11,6 +10,7 @@ import systems.comodal.pagerduty.exceptions.PagerDutyRequestException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {

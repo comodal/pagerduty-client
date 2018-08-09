@@ -1,9 +1,9 @@
 package systems.comodal.pagerduty.event.data.adapters;
 
-import jdk.incubator.http.HttpResponse;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 
 public interface PagerDutyEventAdapter {
 

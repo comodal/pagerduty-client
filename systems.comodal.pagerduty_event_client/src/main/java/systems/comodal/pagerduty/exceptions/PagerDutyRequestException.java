@@ -1,7 +1,6 @@
 package systems.comodal.pagerduty.exceptions;
 
-import jdk.incubator.http.HttpResponse;
-
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

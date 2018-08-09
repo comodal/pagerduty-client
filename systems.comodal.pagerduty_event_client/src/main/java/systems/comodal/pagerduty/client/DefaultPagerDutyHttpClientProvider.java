@@ -1,8 +1,8 @@
 package systems.comodal.pagerduty.client;
 
-import jdk.incubator.http.HttpClient;
+import java.net.http.HttpClient;
 
-import static jdk.incubator.http.HttpClient.Version.HTTP_2;
+import static java.net.http.HttpClient.Version.HTTP_2;
 
 public final class DefaultPagerDutyHttpClientProvider implements PagerDutyHttpClientProvider {
 
