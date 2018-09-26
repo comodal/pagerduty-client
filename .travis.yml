@@ -33,11 +33,14 @@ jobs:
   include:
     - stage: build
       name: "Build, Test and Code Coverage"
+      install:
+        - git --version
+        - ./gradlew  --no-daemon --stacktrace assemble
       script:
         -  git --version
-        - ./gradlew --stacktrace check
+        - ./gradlew  --no-daemon --stacktrace check
     - stage: publish
       name: "Publish to Bintray"
       script:
-        - ./gradlew check
-        - ./gradlew :pagerduty-event-client:bintrayUpload
+        - ./gradlew --no-daemon check
+        - ./gradlew --no-daemon :pagerduty-event-client:bintrayUpload
