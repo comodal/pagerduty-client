@@ -16,6 +16,7 @@ subprojects {
   scmVersion {
     tag {
       prefix = ''
+//      serialize = {config, version -> version}
     }
     repository {
       if (project.hasProperty("AXION_RELEASE_GITHUB_TOKEN")) {
