@@ -34,10 +34,8 @@ jobs:
     - stage: build
       name: "Build, Test and Code Coverage"
       install:
-        - git --version
-        - ./gradlew  --no-daemon --stacktrace assemble
+        - ./gradlew --no-daemon --stacktrace assemble
       script:
-        -  git --version
         - ./gradlew  --no-daemon --stacktrace check
     - stage: publish
       name: "Publish to Bintray"

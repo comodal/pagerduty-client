@@ -8,8 +8,8 @@ project(':systems.comodal.pagerduty_event_client_test').name = 'pagerduty-event-
 
 enableFeaturePreview('STABLE_PUBLISHING')
 
-sourceControl {
-  gitRepository('ssh://git@github.com/comodal/json-iterator.git') {
-    producesModule("systems.comodal:json-iterator")
-  }
-}
+//sourceControl {
+//  gitRepository('ssh://git@github.com/comodal/json-iterator.git') {
+//    producesModule("systems.comodal:json-iterator")
+//  }
+//}
