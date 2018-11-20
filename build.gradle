@@ -3,25 +3,23 @@ buildscript {
     maven { url = 'https://plugins.gradle.org/m2/' }
   }
   dependencies {
-    classpath "pl.allegro.tech.build:axion-release-plugin:1.9.3"
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+    classpath "org.javamodularity:moduleplugin:+"
+    classpath "pl.allegro.tech.build:axion-release-plugin:+"
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
   }
 }
 
 subprojects {
   apply plugin: 'java-library'
+  apply plugin: 'org.javamodularity.moduleplugin'
   apply plugin: 'pl.allegro.tech.build.axion-release'
   apply plugin: 'maven-publish'
 
   scmVersion {
     tag {
       prefix = ''
-//      serialize = {config, version -> version}
     }
     repository {
-      if (project.hasProperty("AXION_RELEASE_GITHUB_TOKEN")) {
-        customUsername = project.AXION_RELEASE_GITHUB_TOKEN
-      }
       pushTagsOnly = true
     }
   }
@@ -29,7 +27,7 @@ subprojects {
   project.group = 'systems.comodal'
   project.version = scmVersion.version
 
-  sourceCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_12
 
   ext {
     bintrayOrg = 'comodal'
@@ -37,95 +35,64 @@ subprojects {
     vcsUrl = 'https://github.com/comodal/pagerduty-client'
   }
 
-  afterEvaluate {
-    repositories {
-      mavenCentral()
-      jcenter()
-      maven { url = 'https://dl.bintray.com/comodal/libraries' }
-    }
+  repositories {
+    mavenCentral()
+    jcenter()
+    maven { url = 'https://dl.bintray.com/comodal/libraries' }
+  }
 
-    configurations.all {
-      resolutionStrategy {
-        cacheDynamicVersionsFor 15, 'minutes'
-        cacheChangingModulesFor 15, 'minutes'
-      }
+  configurations.all {
+    resolutionStrategy {
+      cacheDynamicVersionsFor 15, 'minutes'
+      cacheChangingModulesFor 15, 'minutes'
     }
+  }
 
-    dependencies {
-      testImplementation 'org.junit.jupiter:junit-jupiter-api:+'
-      testImplementation 'org.junit.jupiter:junit-jupiter-params:+'
-      testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:+'
+  dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:+'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:+'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:+'
+  }
+
+  compileJava {
+    options.compilerArgs = ['--enable-preview']
+  }
+
+  compileTestJava {
+    options.compilerArgs = ['--enable-preview']
+  }
+
+  test {
+    useJUnitPlatform()
+    jvmArgs = ['--enable-preview', '-XX:+UnlockExperimentalVMOptions', '-XX:+UseJVMCICompiler']
+    maxParallelForks = 4
+    testLogging {
+      events "passed", "skipped", "failed", "standardOut", "standardError"
     }
+  }
 
-    compileJava {
-      if (project.hasProperty("moduleName")) {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-          options.compilerArgs = [ '--module-path', classpath.asPath ]
-          classpath = files()
-        }
-      }
-    }
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
 
-    compileTestJava {
-      if (project.hasProperty("moduleName")) {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-          options.compilerArgs = [
-            '--module-path', classpath.asPath,
-            '--add-modules', 'org.junit.jupiter.api,jdk.httpserver',
-            '--add-reads', "$moduleName=org.junit.jupiter.api,jdk.httpserver",
-            '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath
-          ]
-          classpath = files()
-        }
-      }
-    }
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
 
-    test {
-      useJUnitPlatform()
-      if (project.hasProperty("moduleName")) {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-          jvmArgs = [
-            '--module-path', classpath.asPath,
-            '--add-modules', 'ALL-MODULE-PATH',
-            '--add-reads', "$moduleName=org.junit.jupiter.api,jdk.httpserver",
-            '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
-            '--add-opens', "$moduleName/systems.comodal.test.pagerduty=org.junit.platform.commons"
-          ]
-          classpath = files()
-        }
-      }
-      maxParallelForks = 4
-      testLogging {
-        events "passed", "skipped", "failed", "standardOut", "standardError"
-      }
-    }
+  artifacts {
+    archives sourcesJar
+  }
 
-    task sourcesJar(type: Jar, dependsOn: classes) {
-      classifier = 'sources'
-      from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-      classifier = 'javadoc'
-      from javadoc.destinationDir
-    }
-
-    artifacts {
-      archives sourcesJar
-    }
-
-    publishing {
-      publications {
-        mavenJava(MavenPublication) {
-          from components.java
-          artifact sourcesJar
-          groupId project.group
-          artifactId project.name
-          version = project.version
-        }
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        groupId project.group
+        artifactId project.name
+        version = project.version
       }
     }
   }

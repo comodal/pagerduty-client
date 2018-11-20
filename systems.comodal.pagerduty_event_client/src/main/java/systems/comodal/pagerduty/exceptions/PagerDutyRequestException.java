@@ -11,10 +11,10 @@ public final class PagerDutyRequestException extends RuntimeException {
   private final List<String> errors;
   private final HttpResponse<?> httpResponse;
 
-  public PagerDutyRequestException(final String status,
-                                   final String message,
-                                   final List<String> errors,
-                                   final HttpResponse<?> httpResponse) {
+  PagerDutyRequestException(final String status,
+                            final String message,
+                            final List<String> errors,
+                            final HttpResponse<?> httpResponse) {
     super(message);
     this.status = status;
     this.errors = errors;
@@ -35,12 +35,12 @@ public final class PagerDutyRequestException extends RuntimeException {
 
   @Override
   public String toString() {
-    return "{\"_class\":\"PagerDutyRequestException\", " +
-        "\"status\":" + (status == null ? "null" : "\"" + status + "\"") + ", " +
-        "\"message\":" + (getMessage() == null ? "null" : "\"" + getMessage() + "\"") + ", " +
-        "\"errors\":" + (errors == null ? "null" : Arrays.toString(errors.toArray())) + ", " +
-        "\"httpResponse\":" + (httpResponse == null ? "null" : httpResponse) +
-        "}";
+    return `{"_class":"PagerDutyRequestException", ` +
+        `"status":` + (status == null ? "null" : '"' + status + '"') + ", " +
+        `"message":` + (getMessage() == null ? "null" : '"' + getMessage() + '"') + ", " +
+        `"errors":` + (errors == null ? "null" : Arrays.toString(errors.toArray())) + ", " +
+        `"httpResponse":` + (httpResponse == null ? "null" : httpResponse) +
+        '}';
   }
 
   public static PagerDutyRequestException.Builder build(final HttpResponse<?> response) {

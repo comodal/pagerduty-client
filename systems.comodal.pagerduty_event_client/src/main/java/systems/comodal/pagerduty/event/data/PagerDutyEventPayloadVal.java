@@ -93,24 +93,24 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
   @Override
   public String getPayloadJson() {
-    return "{\"summary\":\"" + summary
-        + "\",\"source\":\"" + source
-        + "\",\"severity\":\"" + severity
-        + "\",\"timestamp\":\"" + timestamp
-        + (component == null ? "\"" : "\",\"component\":\"" + component + '"')
-        + (group == null ? "" : ",\"group\":\"" + group + '"')
-        + (type == null ? "" : ",\"class\":\"" + type + '"')
-        + (customDetails.isEmpty() ? "" : ",\"custom_details\":" + toJson(customDetails))
-        + "}";
+    return `{"summary":"` + summary
+        + `","source":"` + source
+        + `","severity":"` + severity
+        + `","timestamp":"` + timestamp
+        + (component == null ? '"' : `","component":"` + component + '"')
+        + (group == null ? "" : `,"group":"` + group + '"')
+        + (type == null ? "" : `,"class":"` + type + '"')
+        + (customDetails.isEmpty() ? "" : `,"custom_details":` + toJson(customDetails))
+        + '}';
   }
 
   private static String toJson(final Map<String, Object> object) {
     return object.entrySet().stream().map(entry -> {
       final var val = entry.getValue();
       if (val instanceof Number) {
-        return "\"" + entry.getKey() + "\":" + val;
+        return '"' + entry.getKey() + `":` + val;
       }
-      return "\"" + entry.getKey() + "\":\"" + val + '"';
+      return '"' + entry.getKey() + `":"` + val + '"';
     }).collect(Collectors.joining(",", "{", "}"));
   }
 
@@ -303,15 +303,15 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
     @Override
     public String getPayloadJson() {
-      return "{\"summary\":\"" + summary
-          + "\",\"source\":\"" + source
-          + "\",\"severity\":\"" + severity
-          + "\",\"timestamp\":\"" + timestamp
-          + (component == null ? "\"" : "\",\"component\":\"" + component + '"')
-          + (group == null ? "" : ",\"group\":\"" + group + '"')
-          + (type == null ? "" : ",\"type\":\"" + type + '"')
-          + (customDetails == null ? "" : ",\"custom_details\":" + PagerDutyEventPayloadVal.toJson(customDetails))
-          + "}";
+      return `{"summary":"` + summary
+          + `","source":"` + source
+          + `","severity":"` + severity
+          + `","timestamp":"` + timestamp
+          + (component == null ? '"' : `","component":"` + component + '"')
+          + (group == null ? "" : `,"group":"` + group + '"')
+          + (type == null ? "" : `,"type":"` + type + '"')
+          + (customDetails == null ? "" : `,"custom_details":` + PagerDutyEventPayloadVal.toJson(customDetails))
+          + '}';
     }
 
     @Override

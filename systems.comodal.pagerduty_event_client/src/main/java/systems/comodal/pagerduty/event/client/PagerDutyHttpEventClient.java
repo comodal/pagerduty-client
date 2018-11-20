@@ -58,19 +58,19 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
 
   @Override
   public CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupeKey) {
-    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"acknowledge\"}");
+    return eventAction(routingKey, dedupeKey, `","event_action":"acknowledge"}`);
   }
 
   @Override
   public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupeKey) {
-    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"resolve\"}");
+    return eventAction(routingKey, dedupeKey, `","event_action":"resolve"}`);
   }
 
   private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey, final String dedupeKey, final String actionBody) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     Objects.requireNonNull(dedupeKey, "De-duplication key is a required field.");
-    final var json = "{\"routing_key\":\"" + routingKey
-        + "\",\"dedup_key\":\"" + dedupeKey
+    final var json = `{"routing_key":"` + routingKey
+        + `","dedup_key":"` + dedupeKey
         + actionBody;
     return createAndSendRequest(json);
   }
@@ -87,20 +87,20 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
     final var imagesJson = payload.getImages().isEmpty()
         ? ""
         : payload.getImages().stream().map(PagerDutyImageRef::toJson)
-        .collect(Collectors.joining(",", ",\"images\":[", "]"));
+        .collect(Collectors.joining(",", `,"images":[`, "]"));
     final var linksJson = payload.getLinks().isEmpty()
         ? ""
         : payload.getLinks().stream().map(PagerDutyLinkRef::toJson)
-        .collect(Collectors.joining(",", ",\"links\":[", "]"));
+        .collect(Collectors.joining(",", `,"links":[`, "]"));
 
-    final var json = "{\"event_action\":\"trigger\",\"payload\":" + payloadJson
-        + ",\"routing_key\":\"" + routingKey + '"'
-        + (dedupeKey == null ? "" : ",\"dedup_key\":\"" + dedupeKey + '"')
-        + ",\"client\":\"" + clientName + '"'
-        + (clientUrl == null ? "" : ",\"client_url\":\"" + clientUrl + '"')
+    final var json = `{"event_action":"trigger","payload":` + payloadJson
+        + `,"routing_key":"` + routingKey + '"'
+        + (dedupeKey == null ? "" : `,"dedup_key":"` + dedupeKey + '"')
+        + `,"client":"` + clientName + '"'
+        + (clientUrl == null ? "" : `,"client_url":"` + clientUrl + '"')
         + imagesJson
         + linksJson
-        + "}";
+        + '}';
 
     return createAndSendRequest(json);
   }
@@ -122,9 +122,9 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
 
   @Override
   public String toString() {
-    return "{\"_class\":\"PagerDutyHttpEventClient\", " +
-        "\"clientName\":" + (clientName == null ? "null" : "\"" + clientName + "\"") + ", " +
-        "\"clientUrl\":" + (clientUrl == null ? "null" : "\"" + clientUrl + "\"") + ", " +
-        "\"eventUriPath\":" + (eventUriPath == null ? "null" : eventUriPath) + "}";
+    return `{"_class":"PagerDutyHttpEventClient", ` +
+        `"clientName":` + (clientName == null ? "null" : '"' + clientName + '"') + ", " +
+        `"clientUrl":` + (clientUrl == null ? "null" :'"' + clientUrl + '"') + ", " +
+        `"eventUriPath":` + (eventUriPath == null ? "null" : eventUriPath) + '}';
   }
 }
