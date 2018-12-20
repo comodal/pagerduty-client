@@ -1,4 +1,10 @@
 buildscript {
+  configurations.all {
+    resolutionStrategy {
+      cacheDynamicVersionsFor 3, 'minutes'
+      cacheChangingModulesFor 3, 'minutes'
+    }
+  }
   repositories {
     maven { url = 'https://plugins.gradle.org/m2/' }
   }
@@ -54,17 +60,8 @@ subprojects {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:+'
   }
 
-  compileJava {
-    options.compilerArgs = ['--enable-preview']
-  }
-
-  compileTestJava {
-    options.compilerArgs = ['--enable-preview']
-  }
-
   test {
     useJUnitPlatform()
-    jvmArgs = ['--enable-preview', '-XX:+UnlockExperimentalVMOptions', '-XX:+UseJVMCICompiler']
     maxParallelForks = 4
     testLogging {
       events "passed", "skipped", "failed", "standardOut", "standardError"

@@ -2,7 +2,6 @@ package systems.comodal.pagerduty.exceptions;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class PagerDutyRequestException extends RuntimeException {
@@ -35,11 +34,10 @@ public final class PagerDutyRequestException extends RuntimeException {
 
   @Override
   public String toString() {
-    return `{"_class":"PagerDutyRequestException", ` +
-        `"status":` + (status == null ? "null" : '"' + status + '"') + ", " +
-        `"message":` + (getMessage() == null ? "null" : '"' + getMessage() + '"') + ", " +
-        `"errors":` + (errors == null ? "null" : Arrays.toString(errors.toArray())) + ", " +
-        `"httpResponse":` + (httpResponse == null ? "null" : httpResponse) +
+    return "PagerDutyRequestException{" +
+        "status='" + status + '\'' +
+        ", errors=" + errors +
+        ", httpResponse=" + httpResponse +
         '}';
   }
 

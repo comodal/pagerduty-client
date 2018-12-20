@@ -95,20 +95,20 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
 
     @Override
     public String toString() {
-      return `{"_class":"PagerDutyEventResponseBuilder", ` +
-          `"status":` + (status == null ? "null" : '"' + status + '"') + ", " +
-          `"message":` + (message == null ? "null" : '"' + message + '"') + ", " +
-          `"dedupeKey":` + (dedupeKey == null ? "null" : '"' + dedupeKey + '"') +
+      return "PagerDutyEventResponseBuilder{" +
+          "status='" + status + '\'' +
+          ", message='" + message + '\'' +
+          ", dedupeKey='" + dedupeKey + '\'' +
           '}';
     }
   }
 
   @Override
   public String toString() {
-    return `{"_class":"PagerDutyEventResponseVal", ` +
-        `"status":` + (status == null ? "null" : '"' + status + '"') + ", " +
-        `"message":` + (message == null ? "null" : '"' + message + '"') + ", " +
-        `"dedupeKey":` + (dedupeKey == null ? "null" : '"' + dedupeKey + '"') +
+    return "PagerDutyEventResponseVal{" +
+        "status='" + status + '\'' +
+        ", message='" + message + '\'' +
+        ", dedupeKey='" + dedupeKey + '\'' +
         '}';
   }
 }
