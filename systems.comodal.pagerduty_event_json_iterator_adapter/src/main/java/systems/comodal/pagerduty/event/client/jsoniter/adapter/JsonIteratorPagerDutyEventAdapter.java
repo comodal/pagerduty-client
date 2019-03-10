@@ -1,9 +1,9 @@
-package systems.comodal.pagerduty.event.data.adapters;
+package systems.comodal.pagerduty.event.client.jsoniter.adapter;
 
 import systems.comodal.jsoniter.JsonException;
 import systems.comodal.jsoniter.JsonIterator;
-import systems.comodal.pagerduty.config.PagerDutySysProp;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
+import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
 import systems.comodal.pagerduty.exceptions.PagerDutyParseException;
 import systems.comodal.pagerduty.exceptions.PagerDutyRequestException;
 
@@ -17,18 +17,15 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
 
   static final JsonIteratorPagerDutyEventAdapter INSTANCE = new JsonIteratorPagerDutyEventAdapter();
 
-  private static final boolean DEBUG = PagerDutySysProp.DEBUG.getBooleanProperty().orElse(Boolean.FALSE);
   private static final ConcurrentLinkedQueue<JsonIterator> JSON_ITERATOR_POOL = new ConcurrentLinkedQueue<>();
 
   private JsonIteratorPagerDutyEventAdapter() {
   }
 
-  private static JsonIterator createInputStreamJsonIterator(final InputStream inputStream) throws IOException {
-    if (DEBUG) {
-      final var responseBytes = slowRead(inputStream); // inputStream.readAllBytes();
-      System.out.println(new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8));
-      return JsonIterator.parse(responseBytes);
-    }
+  private static JsonIterator createInputStreamJsonIterator(final InputStream inputStream) {
+//    final var responseBytes = slowRead(inputStream); // inputStream.readAllBytes();
+//    System.out.println(new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8));
+//    return JsonIterator.parse(responseBytes);
     final var jsonIterator = JSON_ITERATOR_POOL.poll();
     return jsonIterator == null ? JsonIterator.parse(inputStream, 2_048) : jsonIterator.reset(inputStream);
   }
@@ -41,9 +38,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
   }
 
   private static void returnJsonIterator(final JsonIterator jsonIterator) {
-    if (!DEBUG) {
-      JSON_ITERATOR_POOL.add(jsonIterator);
-    }
+    JSON_ITERATOR_POOL.add(jsonIterator);
   }
 
   private static JsonIterator createInputStreamJsonIterator(final HttpResponse<InputStream> response) throws IOException {

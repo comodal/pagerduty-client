@@ -1,12 +1,10 @@
 package systems.comodal.pagerduty.event.client;
 
-import systems.comodal.pagerduty.client.PagerDutyHttpClientProvider;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 import systems.comodal.pagerduty.event.data.PagerDutyImageRef;
 import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
-import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapterFactory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,37 +16,41 @@ import java.util.stream.Collectors;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static systems.comodal.pagerduty.config.PagerDutySysProp.*;
 
 final class PagerDutyHttpEventClient implements PagerDutyEventClient {
 
-  private final String clientName;
-  private final String clientUrl;
+  private final String defaultClientName;
+  private final String defaultClientUrl;
   private final String defaultRoutingKey;
-  private final String authTokenHeaderVal;
-  private final URI eventUriPath;
+  private final String authorizationHeader;
+  private final URI eventUri;
   private final HttpClient httpClient;
   private final PagerDutyEventAdapter adapter;
 
-  PagerDutyHttpEventClient(final String clientName) {
-    this.clientName = clientName;
-    this.clientUrl = PAGER_DUTY_EVENT_CLIENT_URL.getStringProperty(clientName).orElse(null);
-    this.defaultRoutingKey = PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY.getStringProperty(clientName).orElse(null);
-    this.authTokenHeaderVal = "Token token=" + PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN.getMandatoryStringProperty(clientName);
-    this.httpClient = PagerDutyHttpClientProvider.load();
-    this.adapter = PagerDutyEventAdapterFactory.load();
-    final var endpoint = URI.create(PAGER_DUTY_EVENT_CLIENT_ENDPOINT.getStringProperty(clientName).orElse("https://events.pagerduty.com"));
-    this.eventUriPath = endpoint.resolve("/v2/enqueue");
+  PagerDutyHttpEventClient(final String defaultClientName,
+                           final String defaultClientUrl,
+                           final String defaultRoutingKey,
+                           final String authorizationHeader,
+                           final URI eventUri,
+                           final HttpClient httpClient,
+                           final PagerDutyEventAdapter adapter) {
+    this.defaultClientName = defaultClientName;
+    this.defaultClientUrl = defaultClientUrl;
+    this.defaultRoutingKey = defaultRoutingKey;
+    this.authorizationHeader = authorizationHeader;
+    this.eventUri = eventUri;
+    this.httpClient = httpClient;
+    this.adapter = adapter;
   }
 
   @Override
-  public String getClientName() {
-    return clientName;
+  public String getDefaultClientName() {
+    return defaultClientName;
   }
 
   @Override
-  public String getClientUrl() {
-    return clientUrl;
+  public String getDefaultClientUrl() {
+    return defaultClientUrl;
   }
 
   @Override
@@ -66,7 +68,9 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
     return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"resolve\"}");
   }
 
-  private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey, final String dedupeKey, final String actionBody) {
+  private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey,
+                                                                final String dedupeKey,
+                                                                final String actionBody) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     Objects.requireNonNull(dedupeKey, "De-duplication key is a required field.");
     final var json = "{\"routing_key\":\"" + routingKey
@@ -82,7 +86,6 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
                                                                 final String dedupeKey,
                                                                 final PagerDutyEventPayload payload) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
-
     final var payloadJson = payload.getPayloadJson();
     final var imagesJson = payload.getImages().isEmpty()
         ? ""
@@ -92,7 +95,6 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
         ? ""
         : payload.getLinks().stream().map(PagerDutyLinkRef::toJson)
         .collect(Collectors.joining(",", ",\"links\":[", "]"));
-
     final var json = "{\"event_action\":\"trigger\",\"payload\":" + payloadJson
         + ",\"routing_key\":\"" + routingKey + '"'
         + (dedupeKey == null ? "" : ",\"dedup_key\":\"" + dedupeKey + '"')
@@ -101,17 +103,15 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
         + imagesJson
         + linksJson
         + '}';
-
     return createAndSendRequest(json);
   }
 
   private HttpRequest createRequest(final String jsonBody) {
-    return HttpRequest.newBuilder(eventUriPath)
+    return HttpRequest.newBuilder(eventUri)
         .headers(
-            "Authorization", authTokenHeaderVal,
+            "Authorization", authorizationHeader,
             "Accept", "application/vnd.pagerduty+json;version=2",
             "Content-Type", "application/json")
-
         .POST(ofString(jsonBody, UTF_8)).build();
   }
 
@@ -122,11 +122,9 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
 
   @Override
   public String toString() {
-    return "PagerDutyHttpEventClient{" +
-        "clientName='" + clientName + '\'' +
-        ", clientUrl='" + clientUrl + '\'' +
+    return "PagerDutyHttpEventClient{defaultClientName='" + defaultClientName + '\'' +
+        ", defaultClientUrl='" + defaultClientUrl + '\'' +
         ", defaultRoutingKey='" + defaultRoutingKey + '\'' +
-        ", eventUriPath=" + eventUriPath +
-        '}';
+        ", eventUri=" + eventUri + '}';
   }
 }

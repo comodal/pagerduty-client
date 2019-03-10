@@ -31,11 +31,12 @@ jobs:
     - stage: build
       name: "Build, Test and Code Coverage"
       install:
-        - ./gradlew --no-daemon --stacktrace assemble
+        - ./gradlew --stacktrace assemble
       script:
-        - ./gradlew  --no-daemon --stacktrace check
+        - ./gradlew --stacktrace check
     - stage: publish
       name: "Publish to Bintray"
       script:
-        - ./gradlew --no-daemon check
-        - ./gradlew --no-daemon :pagerduty-event-client:bintrayUpload
+        - ./gradlew check
+        - ./gradlew :pagerduty-event-json-iterator-adapter:bintrayUpload
+        - ./gradlew :pagerduty-event-client:bintrayUpload

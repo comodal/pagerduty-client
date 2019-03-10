@@ -1,6 +1,6 @@
 package systems.comodal.test.pagerduty;
 
-import systems.comodal.pagerduty.event.client.PagerDutyEventClientFactory;
+import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyImageRef;
 import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
@@ -9,8 +9,6 @@ import systems.comodal.pagerduty.event.data.PagerDutySeverity;
 import java.time.ZonedDateTime;
 
 import static java.time.ZoneOffset.UTC;
-import static systems.comodal.pagerduty.config.PagerDutySysProp.PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN;
-import static systems.comodal.pagerduty.config.PagerDutySysProp.PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY;
 
 public final class Integ {
 
@@ -18,13 +16,11 @@ public final class Integ {
   }
 
   public static void main(final String[] args) {
-    final var clientName = "comodal-systems-integ";
-    final var integrationKey = "";
-    final var authToken = "";
-    PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY.set(clientName, integrationKey);
-    PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN.set(clientName, authToken);
-
-    final var client = PagerDutyEventClientFactory.load(clientName);
+    final var client = PagerDutyEventClient.build()
+        .defaultClientName("comodal-systems-integ")
+        .defaultRoutingKey("INTEGRATION_KEY")
+        .authToken("AUTH_TOKEN")
+        .create();
 
     var payload = PagerDutyEventPayload.build()
         .summary("test-summary")

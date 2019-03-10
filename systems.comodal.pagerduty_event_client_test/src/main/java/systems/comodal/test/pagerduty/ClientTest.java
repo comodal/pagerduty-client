@@ -3,7 +3,6 @@ package systems.comodal.test.pagerduty;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -14,17 +13,14 @@ import java.util.function.BiConsumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public interface ClientTest<T> {
+public interface ClientTest {
 
   Path DATA_PATH = Paths.get("src/test/resources/systems/comodal/test/pagerduty/").toAbsolutePath();
 
-  void configureClient(final String clientName, final HttpServer httpServer);
+  void createContext(final HttpServer httpServer,
+                     final BiConsumer<String, HttpHandler> server);
 
-  void createContext(final String clientName, final BiConsumer<String, HttpHandler> server);
-
-  T createClient(final String clientName);
-
-  void test(final T client) throws IOException;
+  void test(final HttpServer httpServer) throws IOException;
 
   default void writeResponse(final HttpExchange httpExchange, final String response) {
     final var responseBytes = response.getBytes(UTF_8);

@@ -1,6 +1,7 @@
 package systems.comodal.test.pagerduty;
 
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.*;
 
@@ -9,16 +10,17 @@ import java.util.function.BiConsumer;
 
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
-import static systems.comodal.pagerduty.config.PagerDutySysProp.PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN;
-import static systems.comodal.pagerduty.config.PagerDutySysProp.PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY;
 
 public final class EventClientTests implements EventClientTest {
 
   @Override
-  public void createContext(final String clientName,
+  public void createContext(final HttpServer httpServer,
                             final BiConsumer<String, HttpHandler> server) {
-    final var authToken = PAGER_DUTY_EVENT_CLIENT_AUTH_TOKEN.getMandatoryStringProperty(clientName);
-    final var routingKey = PAGER_DUTY_EVENT_CLIENT_ROUTING_KEY.getMandatoryStringProperty(clientName);
+    final int port = httpServer.getAddress().getPort();
+    final var clientName = "test-" + port;
+    final var authToken = "auth-token-" + port;
+    final var routingKey = "routing-key-" + port;
+
     server.accept("/v2/enqueue", httpExchange -> {
       assertEquals("POST", httpExchange.getRequestMethod());
 
@@ -32,7 +34,7 @@ public final class EventClientTests implements EventClientTest {
       final var body = new String(httpExchange.getRequestBody().readAllBytes());
       if (body.startsWith("{\"event_action\":\"trigger")) {
         assertEquals("{\"event_action\":\"trigger\",\"payload\":" +
-            "{\"summary\":\"test-summary\",\"source\":\"test-source\",\"severity\":\"critical\",\"timestamp\":\"2018-08-01T00:00Z\",\"component\":\"test-component\",\"group\":\"test-group\",\"class\":\"test-class\"," +
+            "{\"summary\":\"test-summary\",\"source\":\"test-source\",\"severity\":\"critical\",\"timestamp\":\"2018-08-01T02:03:04Z\",\"component\":\"test-component\",\"group\":\"test-group\",\"class\":\"test-class\"," +
             "\"custom_details\":{\"test-num-metric\":1,\"test-string-metric\":\"val\"}" +
             "},\"routing_key\":\"" + routingKey +
             "\",\"client\":\"" + clientName +
@@ -64,7 +66,7 @@ public final class EventClientTests implements EventClientTest {
         .summary("test-summary")
         .source("test-source")
         .severity(PagerDutySeverity.critical)
-        .timestamp(ZonedDateTime.of(2018, 8, 1, 0, 0, 0, 0, UTC))
+        .timestamp(ZonedDateTime.of(2018, 8, 1, 2, 3, 4, 0, UTC))
         .component("test-component")
         .group("test-group")
         .type("test-class")

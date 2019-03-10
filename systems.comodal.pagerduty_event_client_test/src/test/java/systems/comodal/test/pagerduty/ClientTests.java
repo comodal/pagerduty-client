@@ -2,7 +2,6 @@ package systems.comodal.test.pagerduty;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.DynamicTest;
-import systems.comodal.pagerduty.config.PagerDutySysProp;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,7 +18,6 @@ final class ClientTests {
   private static final ConcurrentLinkedQueue<HttpServer> HTTP_SERVER_POOL = new ConcurrentLinkedQueue<>();
 
   static {
-    PagerDutySysProp.DEBUG.set("false");
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       for (var httpServer = HTTP_SERVER_POOL.poll(); httpServer != null; httpServer = HTTP_SERVER_POOL.poll()) {
         httpServer.stop(0);
@@ -30,27 +28,24 @@ final class ClientTests {
   private ClientTests() {
   }
 
-  static DynamicTest createTest(final ClientTest<?> test) {
+  static DynamicTest createTest(final ClientTest test) {
     return dynamicTest(test.getClass().getSimpleName(), () -> runTest(test));
   }
 
   @SuppressWarnings("unchecked")
-  static DynamicTest createTest(final ServiceLoader.Provider<ClientTest> testProvider) {
+  static DynamicTest createTest(final ServiceLoader.Provider<? extends ClientTest> testProvider) {
     return dynamicTest(testProvider.type().getSimpleName(), () -> runTest(testProvider.get()));
   }
 
-  private static <C> void runTest(final ClientTest<C> clientTest) {
+  private static void runTest(final ClientTest clientTest) {
     final var httpServer = createServer();
-    final var port = httpServer.getAddress().getPort();
-    final var clientName = "test-" + port;
-    final var testFuture = createContext(clientTest, clientName, httpServer);
-    final var client = clientTest.createClient(clientName);
+    final var testFuture = createContext(clientTest, httpServer);
     try {
       // Run async within the future in case future is terminated on the server side.
       // This will ensure an early termination and proper reporting in the event of a server side exception.
       testFuture.completeAsync(() -> {
         try {
-          clientTest.test(client);
+          clientTest.test(httpServer);
         } catch (final IOException e) {
           throw new UncheckedIOException(e);
         }
@@ -61,12 +56,10 @@ final class ClientTests {
     }
   }
 
-  private static <C> CompletableFuture<Void> createContext(final ClientTest<C> clientTest,
-                                                           final String clientName,
+  private static <C> CompletableFuture<Void> createContext(final ClientTest clientTest,
                                                            final HttpServer httpServer) {
-    clientTest.configureClient(clientName, httpServer);
     final var testFuture = new CompletableFuture<Void>();
-    clientTest.createContext(clientName, (path, httpHandler) -> {
+    clientTest.createContext(httpServer, (path, httpHandler) -> {
       final var httpContext = httpServer.createContext(path, httpExchange -> {
         try {
           httpHandler.handle(httpExchange);

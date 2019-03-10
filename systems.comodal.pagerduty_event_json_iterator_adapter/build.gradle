@@ -1,0 +1,9 @@
+ext {
+  desc = 'Pagerduty Event Client JSON Iterator Response Adapter'
+  moduleName = 'systems.comodal.pagerduty_event_json_iterator_adapter'
+}
+
+dependencies {
+  implementation project(':pagerduty-event-client')
+  implementation 'systems.comodal:json-iterator:+'
+}

@@ -15,20 +15,18 @@ buildscript {
   }
 }
 
+apply plugin: 'pl.allegro.tech.build.axion-release'
+
+scmVersion {
+  tag.prefix = ''
+  repository.pushTagsOnly = true
+}
+
 subprojects {
   apply plugin: 'java-library'
   apply plugin: 'org.javamodularity.moduleplugin'
-  apply plugin: 'pl.allegro.tech.build.axion-release'
   apply plugin: 'maven-publish'
-
-  scmVersion {
-    tag {
-      prefix = ''
-    }
-    repository {
-      pushTagsOnly = true
-    }
-  }
+  apply plugin: 'com.jfrog.bintray'
 
   project.group = 'systems.comodal'
   project.version = scmVersion.version
@@ -36,6 +34,7 @@ subprojects {
   sourceCompatibility = JavaVersion.VERSION_12
 
   ext {
+    desc = 'Pagerduty Event Client'
     bintrayOrg = 'comodal'
     bintrayRepo = 'libraries'
     vcsUrl = 'https://github.com/comodal/pagerduty-client'
@@ -65,6 +64,8 @@ subprojects {
     maxParallelForks = 4
     testLogging {
       events "passed", "skipped", "failed", "standardOut", "standardError"
+      exceptionFormat "full"
+      showStandardStreams true
     }
   }
 
@@ -90,6 +91,35 @@ subprojects {
         groupId project.group
         artifactId project.name
         version = project.version
+      }
+    }
+  }
+
+  afterEvaluate {
+    bintray {
+      override = true
+      user = project.hasProperty("bintrayUser") ? bintrayUser : System.getenv('BINTRAY_USER')
+      key = project.hasProperty("bintrayApiKey") ? bintrayApiKey : System.getenv('BINTRAY_API_KEY')
+      publications = ['mavenJava']
+      pkg {
+        userOrg = project.bintrayOrg
+        repo = project.bintrayRepo
+        name = project.name
+        desc = project.desc
+        vcsUrl = project.vcsUrl
+        websiteUrl = project.vcsUrl
+        issueTrackerUrl = project.vcsUrl + '/issues'
+        licenses = ["Apache-2.0"]
+        publish = true
+        version {
+          name = project.version
+          vcsTag = project.name + '-' + project.version
+          released = new Date()
+          gpg {
+            sign = true
+            passphrase = project.hasProperty("bintrayGPGPassphrase") ? bintrayGPGPassphrase : System.getenv('BINTRAY_GPG_PASSPHRASE')
+          }
+        }
       }
     }
   }
