@@ -5,7 +5,7 @@ This client aims to be compliant with the latest GA JDK and [PagerDuty Event API
 ## Hello Event Trigger
 
 ```java
-final var client = PagerDutyEventClient.build()
+var client = PagerDutyEventClient.build()
     .defaultClientName("CLIENT_NAME")
     .defaultRoutingKey("INTEGRATION_KEY")
     .authToken("AUTH_TOKEN")

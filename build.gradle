@@ -67,6 +67,9 @@ subprojects {
       exceptionFormat "full"
       showStandardStreams true
     }
+//    moduleOptions {
+//      runOnClasspath = true
+//    }
   }
 
   task sourcesJar(type: Jar, dependsOn: classes) {
