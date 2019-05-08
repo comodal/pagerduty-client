@@ -27,4 +27,8 @@ public final class PagerDutyParseException extends RuntimeException {
     super(cause);
     this.buffer = buffer;
   }
+
+  public String getBuffer() {
+    return buffer;
+  }
 }

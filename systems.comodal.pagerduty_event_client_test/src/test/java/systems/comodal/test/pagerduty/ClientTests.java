@@ -32,7 +32,6 @@ final class ClientTests {
     return dynamicTest(test.getClass().getSimpleName(), () -> runTest(test));
   }
 
-  @SuppressWarnings("unchecked")
   static DynamicTest createTest(final ServiceLoader.Provider<? extends ClientTest> testProvider) {
     return dynamicTest(testProvider.type().getSimpleName(), () -> runTest(testProvider.get()));
   }
@@ -56,8 +55,8 @@ final class ClientTests {
     }
   }
 
-  private static <C> CompletableFuture<Void> createContext(final ClientTest clientTest,
-                                                           final HttpServer httpServer) {
+  private static CompletableFuture<Void> createContext(final ClientTest clientTest,
+                                                       final HttpServer httpServer) {
     final var testFuture = new CompletableFuture<Void>();
     clientTest.createContext(httpServer, (path, httpHandler) -> {
       final var httpContext = httpServer.createContext(path, httpExchange -> {

@@ -10,10 +10,10 @@ public final class PagerDutyRequestException extends RuntimeException {
   private final List<String> errors;
   private final HttpResponse<?> httpResponse;
 
-  PagerDutyRequestException(final String status,
-                            final String message,
-                            final List<String> errors,
-                            final HttpResponse<?> httpResponse) {
+  private PagerDutyRequestException(final String status,
+                                    final String message,
+                                    final List<String> errors,
+                                    final HttpResponse<?> httpResponse) {
     super(message);
     this.status = status;
     this.errors = errors;
@@ -34,11 +34,9 @@ public final class PagerDutyRequestException extends RuntimeException {
 
   @Override
   public String toString() {
-    return "PagerDutyRequestException{" +
-        "status='" + status + '\'' +
+    return "PagerDutyRequestException{status='" + status + '\'' +
         ", errors=" + errors +
-        ", httpResponse=" + httpResponse +
-        '}';
+        ", httpResponse=" + httpResponse + '}';
   }
 
   public static PagerDutyRequestException.Builder build(final HttpResponse<?> response) {

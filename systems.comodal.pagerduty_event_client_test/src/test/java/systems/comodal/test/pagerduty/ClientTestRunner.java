@@ -18,7 +18,6 @@ final class ClientTestRunner {
 
   @TestFactory
   Stream<DynamicTest> runAllEventClientTests() {
-    return ServiceLoader.load(ClientTest.class).stream().parallel()
-        .map(ClientTests::createTest);
+    return ServiceLoader.load(ClientTest.class).stream().parallel().map(ClientTests::createTest);
   }
 }

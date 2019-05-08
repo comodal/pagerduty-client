@@ -8,14 +8,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.function.BiConsumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public interface ClientTest {
-
-  Path DATA_PATH = Paths.get("src/test/resources/systems/comodal/test/pagerduty/").toAbsolutePath();
 
   void createContext(final HttpServer httpServer,
                      final BiConsumer<String, HttpHandler> server);
