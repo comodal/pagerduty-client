@@ -144,10 +144,32 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     private String group;
     private String type;
     private Map<String, Object> customDetails;
-    private List<PagerDutyLinkRef> links = List.of();
-    private List<PagerDutyImageRef> images = List.of();
+    private List<PagerDutyLinkRef> links;
+    private List<PagerDutyImageRef> images;
 
     PagerDutyEventPayloadBuilder() {
+      this.customDetails = Map.of();
+      this.links = List.of();
+      this.images = List.of();
+    }
+
+    PagerDutyEventPayloadBuilder(final PagerDutyEventPayload prototype) {
+      this.summary = prototype.getSummary();
+      this.source = prototype.getSource();
+      this.severity = prototype.getSeverity();
+      this.timestamp = prototype.getTimestamp();
+      this.component = prototype.getComponent();
+      this.group = prototype.getGroup();
+      this.type = prototype.getType();
+      this.customDetails = prototype.getCustomDetails().size() > 1
+          ? new LinkedHashMap<>(prototype.getCustomDetails())
+          : Map.copyOf(prototype.getCustomDetails());
+      this.links = prototype.getLinks().size() > 1
+          ? new ArrayList<>(prototype.getLinks())
+          : List.copyOf(prototype.getLinks());
+      this.images = prototype.getImages().size() > 1
+          ? new ArrayList<>(prototype.getImages())
+          : List.copyOf(prototype.getImages());
     }
 
     @Override
@@ -206,8 +228,12 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     }
 
     private Builder customDetailsObject(final String field, final Object fieldValue) {
-      if (customDetails == null) {
-        customDetails = new LinkedHashMap<>();
+      if (customDetails == null || customDetails.isEmpty()) {
+        customDetails = Map.of(field, fieldValue);
+        return this;
+      }
+      if (customDetails.size() == 1) {
+        customDetails = new LinkedHashMap<>(customDetails);
       }
       customDetails.put(field, fieldValue);
       return this;
@@ -286,9 +312,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
     @Override
     public Map<String, Object> getCustomDetails() {
-      return customDetails == null
-          ? Map.of()
-          : customDetails;
+      return customDetails == null ? Map.of() : customDetails;
     }
 
     @Override

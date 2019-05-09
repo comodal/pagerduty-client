@@ -10,6 +10,10 @@ public interface PagerDutyEventPayload {
     return new PagerDutyEventPayloadVal.PagerDutyEventPayloadBuilder();
   }
 
+  static PagerDutyEventPayload.Builder build(final PagerDutyEventPayload prototype) {
+    return prototype == null ? build() : new PagerDutyEventPayloadVal.PagerDutyEventPayloadBuilder(prototype);
+  }
+
   String getSummary();
 
   String getSource();
