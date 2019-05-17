@@ -3,27 +3,27 @@ package systems.comodal.pagerduty.event.service;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 
-final class PagerdutyServiceBuilder implements PagerdutyService.Builder {
+final class PagerDutyServiceBuilder implements PagerDutyService.Builder {
 
   private PagerDutyEventClient client;
   private PagerDutyEventPayload eventPrototype;
 
-  PagerdutyServiceBuilder() {
+  PagerDutyServiceBuilder() {
   }
 
   @Override
-  public PagerdutyService create() {
-    return new PagerdutyServiceVal(client, eventPrototype);
+  public PagerDutyService create() {
+    return new PagerDutyServiceVal(client, eventPrototype);
   }
 
   @Override
-  public PagerdutyService.Builder clientName(final PagerDutyEventClient client) {
+  public PagerDutyService.Builder client(final PagerDutyEventClient client) {
     this.client = client;
     return this;
   }
 
   @Override
-  public PagerdutyService.Builder eventPrototype(final PagerDutyEventPayload eventPrototype) {
+  public PagerDutyService.Builder eventPrototype(final PagerDutyEventPayload eventPrototype) {
     this.eventPrototype = eventPrototype;
     return this;
   }

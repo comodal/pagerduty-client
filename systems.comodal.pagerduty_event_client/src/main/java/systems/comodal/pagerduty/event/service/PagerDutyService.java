@@ -9,10 +9,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 
-public interface PagerdutyService {
+public interface PagerDutyService {
 
-  static PagerdutyService.Builder build() {
-    return new PagerdutyServiceBuilder();
+  static PagerDutyService.Builder build() {
+    return new PagerDutyServiceBuilder();
   }
 
   static LongUnaryOperator createRetryDelayFn(final int maxRetries,
@@ -61,9 +61,9 @@ public interface PagerdutyService {
 
   interface Builder {
 
-    PagerdutyService create();
+    PagerDutyService create();
 
-    Builder clientName(final PagerDutyEventClient client);
+    Builder client(final PagerDutyEventClient client);
 
     Builder eventPrototype(final PagerDutyEventPayload eventPrototype);
   }

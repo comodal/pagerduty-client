@@ -14,14 +14,14 @@ import static java.lang.String.format;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
-final class PagerdutyServiceVal implements PagerdutyService {
+final class PagerDutyServiceVal implements PagerDutyService {
 
-  private static final System.Logger log = System.getLogger(PagerdutyService.class.getSimpleName());
+  private static final System.Logger log = System.getLogger(PagerDutyService.class.getSimpleName());
 
   private final PagerDutyEventClient client;
   private final PagerDutyEventPayload eventPrototype;
 
-  PagerdutyServiceVal(final PagerDutyEventClient client, final PagerDutyEventPayload eventPrototype) {
+  PagerDutyServiceVal(final PagerDutyEventClient client, final PagerDutyEventPayload eventPrototype) {
     this.client = client;
     this.eventPrototype = eventPrototype;
   }
@@ -46,7 +46,7 @@ final class PagerdutyServiceVal implements PagerdutyService {
       return null;
     }
     final int maxRetries = (int) Math.min(Integer.MAX_VALUE, giveUpAfter.toMillis() / timeUnit.toMillis(stepDelay));
-    return resolveEvent(triggerResponse, 0, PagerdutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+    return resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
@@ -56,7 +56,7 @@ final class PagerdutyServiceVal implements PagerdutyService {
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
     return triggerResponse == null ? null
-        : resolveEvent(triggerResponse, 0, PagerdutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+        : resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
@@ -94,7 +94,7 @@ final class PagerdutyServiceVal implements PagerdutyService {
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
     final int maxRetries = (int) Math.min(Integer.MAX_VALUE, giveUpAfter.toMillis() / timeUnit.toMillis(stepDelay));
-    return triggerEvent(payload, 0, PagerdutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+    return triggerEvent(payload, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
@@ -103,7 +103,7 @@ final class PagerdutyServiceVal implements PagerdutyService {
                                                                 final long stepDelay,
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
-    return triggerEvent(payload, 0, PagerdutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+    return triggerEvent(payload, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
