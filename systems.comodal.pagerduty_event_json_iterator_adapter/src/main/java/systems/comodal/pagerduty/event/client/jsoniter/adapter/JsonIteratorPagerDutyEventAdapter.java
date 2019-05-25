@@ -88,12 +88,12 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     }
   }
 
-  private static final ContextFieldBufferPredicate<PagerDutyEventResponse.Builder> EVENT_RESPONSE_PARSER = (response, len, buf, ji) -> {
-    if (fieldEquals("status", buf, len)) {
+  private static final ContextFieldBufferPredicate<PagerDutyEventResponse.Builder> EVENT_RESPONSE_PARSER = (response, buf, offset, len, ji) -> {
+    if (fieldEquals("status", buf, offset, len)) {
       response.status(ji.readString());
-    } else if (fieldEquals("message", buf, len)) {
+    } else if (fieldEquals("message", buf, offset, len)) {
       response.message(ji.readString());
-    } else if (fieldEquals("dedup_key", buf, len)) {
+    } else if (fieldEquals("dedup_key", buf, offset, len)) {
       response.dedupeKey(ji.readString());
     } else {
       ji.skip();
@@ -105,12 +105,12 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     return ji.testObject(PagerDutyEventResponse.build(), EVENT_RESPONSE_PARSER).create();
   }
 
-  private static final ContextFieldBufferPredicate<PagerDutyRequestException.Builder> EXCEPTION_PARSER = (exception, len, buf, ji) -> {
-    if (fieldEquals("status", buf, len)) {
+  private static final ContextFieldBufferPredicate<PagerDutyRequestException.Builder> EXCEPTION_PARSER = (exception, buf, offset, len, ji) -> {
+    if (fieldEquals("status", buf, offset, len)) {
       exception.status(ji.readString());
-    } else if (fieldEquals("message", buf, len)) {
+    } else if (fieldEquals("message", buf, offset, len)) {
       exception.message(ji.readString());
-    } else if (fieldEquals("errors", buf, len)) {
+    } else if (fieldEquals("errors", buf, offset, len)) {
       while (ji.readArray()) {
         exception.error(ji.readString());
       }
