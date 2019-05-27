@@ -58,7 +58,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
           throw exception.message("Too many requests").create();
         }
         throw adaptException(exception, ji);
-      } catch (final IOException | JsonException | NullPointerException runtimeCause) {
+      } catch (final JsonException | NullPointerException runtimeCause) {
         throw new PagerDutyParseException(runtimeCause, ji.currentBuffer());
       } finally {
         returnJsonIterator(ji);
@@ -76,7 +76,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     try (final var ji = createInputStreamJsonIterator(response)) {
       try {
         return adaptResponse(ji);
-      } catch (final IOException | JsonException | NullPointerException runtimeCause) {
+      } catch (final JsonException | NullPointerException runtimeCause) {
         throw new PagerDutyParseException(runtimeCause, ji.currentBuffer());
       } finally {
         returnJsonIterator(ji);
@@ -101,7 +101,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     return true;
   };
 
-  private PagerDutyEventResponse adaptResponse(final JsonIterator ji) throws IOException {
+  private PagerDutyEventResponse adaptResponse(final JsonIterator ji) {
     return ji.testObject(PagerDutyEventResponse.build(), EVENT_RESPONSE_PARSER).create();
   }
 
@@ -120,7 +120,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     return true;
   };
 
-  private PagerDutyRequestException adaptException(final PagerDutyRequestException.Builder exception, final JsonIterator ji) throws IOException {
+  private PagerDutyRequestException adaptException(final PagerDutyRequestException.Builder exception, final JsonIterator ji) {
     return ji.testObject(exception, EXCEPTION_PARSER).create();
   }
 }
