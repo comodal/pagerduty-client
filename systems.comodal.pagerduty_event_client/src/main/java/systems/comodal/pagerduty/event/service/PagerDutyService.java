@@ -15,6 +15,10 @@ public interface PagerDutyService {
     return new PagerDutyServiceBuilder();
   }
 
+  static LongUnaryOperator createRetryDelayFn(final long stepDelay, final long maxDelay) {
+    return numFailures -> Math.min(maxDelay, numFailures * stepDelay);
+  }
+
   static LongUnaryOperator createRetryDelayFn(final int maxRetries,
                                               final long stepDelay,
                                               final long maxDelay) {
@@ -26,6 +30,11 @@ public interface PagerDutyService {
   PagerDutyEventClient getClient();
 
   PagerDutyEventPayload getEventPrototype();
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                         final long stepDelay,
+                                                         final long maxDelay,
+                                                         final TimeUnit timeUnit);
 
   CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
                                                          final Duration giveUpAfter,
@@ -41,6 +50,11 @@ public interface PagerDutyService {
 
   CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
                                                          final LongUnaryOperator retryDelayFn,
+                                                         final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload,
+                                                         final long stepDelay,
+                                                         final long maxDelay,
                                                          final TimeUnit timeUnit);
 
   CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload,

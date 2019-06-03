@@ -1,31 +1,48 @@
 package systems.comodal.pagerduty.exceptions;
 
-public final class PagerDutyParseException extends RuntimeException {
+import java.net.http.HttpResponse;
 
+public final class PagerDutyParseException extends RuntimeException implements PagerDutyClientException {
+
+  private final HttpResponse<?> httpResponse;
   private final String buffer;
 
-  public static PagerDutyParseException unhandledField(final String context, final String field, final String buffer) {
-    return new PagerDutyParseException("Unhandled " + context + " field '" + field + '\'', buffer);
+  public static PagerDutyParseException unhandledField(final HttpResponse<?> httpResponse, final String context, final String field, final String buffer) {
+    return new PagerDutyParseException(httpResponse, "Unhandled " + context + " field '" + field + '\'', buffer);
   }
 
-  public PagerDutyParseException(final String message, final String buffer) {
+  public PagerDutyParseException(final HttpResponse<?> httpResponse, final String message, final String buffer) {
     super(message);
+    this.httpResponse = httpResponse;
     this.buffer = buffer;
   }
 
-  public PagerDutyParseException(final String message, final Throwable cause) {
+  public PagerDutyParseException(final HttpResponse<?> httpResponse, final String message, final Throwable cause) {
     super(message, cause);
+    this.httpResponse = httpResponse;
     this.buffer = null;
   }
 
-  public PagerDutyParseException(final Throwable cause) {
+  public PagerDutyParseException(final HttpResponse<?> httpResponse, final Throwable cause) {
     super(cause);
+    this.httpResponse = httpResponse;
     this.buffer = null;
   }
 
-  public PagerDutyParseException(final Throwable cause, final String buffer) {
+  public PagerDutyParseException(final HttpResponse<?> httpResponse, final Throwable cause, final String buffer) {
     super(cause);
+    this.httpResponse = httpResponse;
     this.buffer = buffer;
+  }
+
+  @Override
+  public boolean canBeRetried() {
+    return httpResponse == null || httpResponse.statusCode() > 400;
+  }
+
+  @Override
+  public HttpResponse<?> getHttpResponse() {
+    return httpResponse;
   }
 
   public String getBuffer() {

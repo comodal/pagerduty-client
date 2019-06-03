@@ -6,14 +6,14 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
 
   private final String status;
   private final String message;
-  private final String dedupeKey;
+  private final String dedupKey;
 
   private PagerDutyEventResponseVal(final String status,
                                     final String message,
-                                    final String dedupeKey) {
+                                    final String dedupKey) {
     this.status = status;
     this.message = message;
-    this.dedupeKey = dedupeKey;
+    this.dedupKey = dedupKey;
   }
 
   @Override
@@ -27,8 +27,8 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
   }
 
   @Override
-  public String getDedupeKey() {
-    return dedupeKey;
+  public String getDedupKey() {
+    return dedupKey;
   }
 
   @Override
@@ -38,26 +38,26 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
     PagerDutyEventResponseVal that = (PagerDutyEventResponseVal) o;
     return Objects.equals(status, that.status) &&
         Objects.equals(message, that.message) &&
-        Objects.equals(dedupeKey, that.dedupeKey);
+        Objects.equals(dedupKey, that.dedupKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, message, dedupeKey);
+    return Objects.hash(status, message, dedupKey);
   }
 
   static final class PagerDutyEventResponseBuilder implements PagerDutyEventResponse.Builder {
 
     private String status;
     private String message;
-    private String dedupeKey;
+    private String dedupKey;
 
     PagerDutyEventResponseBuilder() {
     }
 
     @Override
     public PagerDutyEventResponse create() {
-      return new PagerDutyEventResponseVal(status, message, dedupeKey);
+      return new PagerDutyEventResponseVal(status, message, dedupKey);
     }
 
     @Override
@@ -73,8 +73,8 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
     }
 
     @Override
-    public Builder dedupeKey(final String dedupeKey) {
-      this.dedupeKey = dedupeKey;
+    public Builder dedupKey(final String dedupKey) {
+      this.dedupKey = dedupKey;
       return this;
     }
 
@@ -89,15 +89,15 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
     }
 
     @Override
-    public String getDedupeKey() {
-      return dedupeKey;
+    public String getDedupKey() {
+      return dedupKey;
     }
 
     @Override
     public String toString() {
       return "PagerDutyEventResponseBuilder{status='" + status + '\'' +
           ", message='" + message + '\'' +
-          ", dedupeKey='" + dedupeKey + '\'' + '}';
+          ", dedupKey='" + dedupKey + '\'' + '}';
     }
   }
 
@@ -105,6 +105,6 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
   public String toString() {
     return "PagerDutyEventResponseVal{status='" + status + '\'' +
         ", message='" + message + '\'' +
-        ", dedupeKey='" + dedupeKey + '\'' + '}';
+        ", dedupKey='" + dedupKey + '\'' + '}';
   }
 }

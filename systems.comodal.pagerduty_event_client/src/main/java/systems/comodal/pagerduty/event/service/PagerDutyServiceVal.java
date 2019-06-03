@@ -3,6 +3,7 @@ package systems.comodal.pagerduty.event.service;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
+import systems.comodal.pagerduty.exceptions.PagerDutyClientException;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -34,6 +35,15 @@ final class PagerDutyServiceVal implements PagerDutyService {
   @Override
   public PagerDutyEventPayload getEventPrototype() {
     return eventPrototype;
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                                final long stepDelay,
+                                                                final long maxDelay,
+                                                                final TimeUnit timeUnit) {
+    return triggerResponse == null ? null
+        : resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
   }
 
   @Override
@@ -74,17 +84,31 @@ final class PagerDutyServiceVal implements PagerDutyService {
     if (retryDelay < 0) {
       return null;
     }
-    final var responseFuture = client.resolveEvent(triggerResponse.getDedupeKey());
+    final var responseFuture = client.resolveEvent(triggerResponse.getDedupKey());
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
       log.log(ERROR, format("Failed %d time(s), last delay was %d %s, to resolve event with dedupe key '%s'.",
-          numFailures, retryDelay, triggerResponse.getDedupeKey(), timeUnit), throwable);
-      return resolveEvent(triggerResponse, numFailures, retryDelayFn, timeUnit);
+          numFailures, retryDelay, triggerResponse.getDedupKey(), timeUnit), throwable);
+      return canBeRetried(throwable)
+          ? resolveEvent(triggerResponse, numFailures, retryDelayFn, timeUnit)
+          : null;
     };
     if (retryDelay > 0) {
       return responseFuture.exceptionallyComposeAsync(exceptionally, delayedExecutor(retryDelay, timeUnit));
     }
     return responseFuture.exceptionallyCompose(exceptionally);
+  }
+
+  private static boolean canBeRetried(final Throwable throwable) {
+    if (throwable instanceof PagerDutyClientException && !((PagerDutyClientException) throwable).canBeRetried()) {
+      return false;
+    }
+    return !(throwable.getCause() instanceof PagerDutyClientException) || ((PagerDutyClientException) throwable.getCause()).canBeRetried();
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload, final long stepDelay, final long maxDelay, final TimeUnit timeUnit) {
+    return triggerEvent(payload, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
   }
 
   @Override
@@ -126,7 +150,9 @@ final class PagerDutyServiceVal implements PagerDutyService {
       final int numFailures = retry + 1;
       log.log(ERROR, format("Failed %d time(s), last delay was %d %s, to trigger event:%n%s%n",
           numFailures, retryDelay, payload, timeUnit), throwable);
-      return triggerEvent(payload, numFailures, retryDelayFn, timeUnit);
+      return canBeRetried(throwable)
+          ? triggerEvent(payload, numFailures, retryDelayFn, timeUnit)
+          : null;
     };
     if (retryDelay > 0) {
       return responseFuture.exceptionallyComposeAsync(exceptionally, delayedExecutor(retryDelay, timeUnit));

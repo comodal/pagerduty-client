@@ -15,6 +15,11 @@ buildscript {
   }
 }
 
+ext {
+  // Used by systems.comodal.pagerduty_event_json_iterator_adapter
+  jsoniter = "2.1.+" // https://github.com/comodal/json-iterator/releases
+}
+
 apply plugin: 'pl.allegro.tech.build.axion-release'
 
 scmVersion {
@@ -67,18 +72,15 @@ subprojects {
       exceptionFormat "full"
       showStandardStreams true
     }
-//    moduleOptions {
-//      runOnClasspath = true
-//    }
   }
 
   task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
   }
 
   task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
   }
 

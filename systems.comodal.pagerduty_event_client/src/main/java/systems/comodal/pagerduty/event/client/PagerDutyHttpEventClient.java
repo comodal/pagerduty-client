@@ -59,31 +59,28 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupeKey) {
-    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"acknowledge\"}");
+  public CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupKey) {
+    return eventAction(routingKey, dedupKey, "\",\"event_action\":\"acknowledge\"}");
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupeKey) {
-    return eventAction(routingKey, dedupeKey, "\",\"event_action\":\"resolve\"}");
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupKey) {
+    return eventAction(routingKey, dedupKey, "\",\"event_action\":\"resolve\"}");
   }
 
   private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey,
-                                                                final String dedupeKey,
+                                                                final String dedupKey,
                                                                 final String actionBody) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
-    Objects.requireNonNull(dedupeKey, "De-duplication key is a required field.");
-    final var json = "{\"routing_key\":\"" + routingKey
-        + "\",\"dedup_key\":\"" + dedupeKey
-        + actionBody;
-    return createAndSendRequest(json);
+    Objects.requireNonNull(dedupKey, "De-duplication key is a required field.");
+    final var json = "{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + actionBody;
+    return createAndSendRequest(routingKey, json);
   }
 
   @Override
   public CompletableFuture<PagerDutyEventResponse> triggerEvent(final String clientName,
                                                                 final String clientUrl,
                                                                 final String routingKey,
-                                                                final String dedupeKey,
                                                                 final PagerDutyEventPayload payload) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     final var payloadJson = payload.getPayloadJson();
@@ -97,26 +94,27 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
         .collect(Collectors.joining(",", ",\"links\":[", "]"));
     final var json = "{\"event_action\":\"trigger\",\"payload\":" + payloadJson
         + ",\"routing_key\":\"" + routingKey + '"'
-        + (dedupeKey == null ? "" : ",\"dedup_key\":\"" + dedupeKey + '"')
+        + ",\"dedup_key\":\"" + payload.getDedupKey() + '"'
         + ",\"client\":\"" + clientName + '"'
         + (clientUrl == null ? "" : ",\"client_url\":\"" + clientUrl + '"')
         + imagesJson
         + linksJson
         + '}';
-    return createAndSendRequest(json);
+    return createAndSendRequest(routingKey, json);
   }
 
-  private HttpRequest createRequest(final String jsonBody) {
+  private HttpRequest createRequest(final String routingKey, final String jsonBody) {
     return HttpRequest.newBuilder(eventUri)
         .headers(
             "Authorization", authorizationHeader,
             "Accept", "application/vnd.pagerduty+json;version=2",
-            "Content-Type", "application/json")
+            "Content-Type", "application/json",
+            "X-Routing-Key", routingKey)
         .POST(ofString(jsonBody, UTF_8)).build();
   }
 
-  private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String jsonBody) {
-    return httpClient.sendAsync(createRequest(jsonBody), ofInputStream())
+  private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String routingKey, final String jsonBody) {
+    return httpClient.sendAsync(createRequest(routingKey, jsonBody), ofInputStream())
         .thenApplyAsync(adapter::adaptResponse);
   }
 

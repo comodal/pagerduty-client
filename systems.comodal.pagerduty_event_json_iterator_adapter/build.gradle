@@ -5,5 +5,5 @@ ext {
 
 dependencies {
   implementation project(':pagerduty-event-client')
-  implementation 'systems.comodal:json-iterator:2.1.+'
+  implementation "systems.comodal:json-iterator:$jsoniter"
 }

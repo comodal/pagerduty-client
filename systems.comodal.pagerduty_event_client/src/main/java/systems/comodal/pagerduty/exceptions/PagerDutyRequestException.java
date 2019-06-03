@@ -4,7 +4,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class PagerDutyRequestException extends RuntimeException {
+public final class PagerDutyRequestException extends RuntimeException implements PagerDutyClientException {
 
   private final String status;
   private final List<String> errors;
@@ -20,10 +20,16 @@ public final class PagerDutyRequestException extends RuntimeException {
     this.httpResponse = httpResponse;
   }
 
+  @Override
+  public boolean canBeRetried() {
+    return httpResponse == null || httpResponse.statusCode() > 400;
+  }
+
   public List<String> getErrors() {
     return errors;
   }
 
+  @Override
   public HttpResponse<?> getHttpResponse() {
     return httpResponse;
   }

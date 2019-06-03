@@ -1,7 +1,6 @@
 package systems.comodal.pagerduty.event.client.jsoniter.adapter;
 
 import systems.comodal.jsoniter.ContextFieldBufferPredicate;
-import systems.comodal.jsoniter.JsonException;
 import systems.comodal.jsoniter.JsonIterator;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
@@ -10,6 +9,7 @@ import systems.comodal.pagerduty.exceptions.PagerDutyRequestException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.http.HttpResponse;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -57,16 +57,21 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
         if (response.statusCode() == 429) {
           throw exception.message("Too many requests").create();
         }
+        if (response.statusCode() == 400) {
+          exception.message("Bad Request - Check that the JSON is valid.");
+        } else if (response.statusCode() >= 500 && response.statusCode() < 600) {
+          exception.message("Internal Server Error - the PagerDuty server experienced an error while processing the event.");
+        }
         throw adaptException(exception, ji);
-      } catch (final JsonException | NullPointerException runtimeCause) {
-        throw new PagerDutyParseException(runtimeCause, ji.currentBuffer());
+      } catch (final RuntimeException runtimeCause) {
+        throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
       } finally {
         returnJsonIterator(ji);
       }
     } catch (final IOException ioEx) {
-      throw new PagerDutyParseException(ioEx);
-    } catch (final JsonException | ArrayIndexOutOfBoundsException | NullPointerException runtimeCause) {
-      throw new PagerDutyParseException("Failed to adapt error response.", runtimeCause);
+      throw new UncheckedIOException(ioEx);
+    } catch (final RuntimeException runtimeCause) {
+      throw new PagerDutyParseException(response, "Failed to adapt error response.", runtimeCause);
     }
   }
 
@@ -76,15 +81,15 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     try (final var ji = createInputStreamJsonIterator(response)) {
       try {
         return adaptResponse(ji);
-      } catch (final JsonException | NullPointerException runtimeCause) {
-        throw new PagerDutyParseException(runtimeCause, ji.currentBuffer());
+      } catch (final RuntimeException runtimeCause) {
+        throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
       } finally {
         returnJsonIterator(ji);
       }
     } catch (final IOException ioEx) {
-      throw new PagerDutyParseException(ioEx);
-    } catch (final JsonException | ArrayIndexOutOfBoundsException | NullPointerException runtimeCause) {
-      throw new PagerDutyParseException("Failed to adapt event response.", runtimeCause);
+      throw new UncheckedIOException(ioEx);
+    } catch (final RuntimeException runtimeCause) {
+      throw new PagerDutyParseException(response, "Failed to adapt event response.", runtimeCause);
     }
   }
 
@@ -94,7 +99,7 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     } else if (fieldEquals("message", buf, offset, len)) {
       response.message(ji.readString());
     } else if (fieldEquals("dedup_key", buf, offset, len)) {
-      response.dedupeKey(ji.readString());
+      response.dedupKey(ji.readString());
     } else {
       ji.skip();
     }

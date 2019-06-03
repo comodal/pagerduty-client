@@ -7,12 +7,14 @@ import java.util.Map;
 public interface PagerDutyEventPayload {
 
   static PagerDutyEventPayload.Builder build() {
-    return new PagerDutyEventPayloadVal.PagerDutyEventPayloadBuilder();
+    return new PagerDutyEventPayloadBuilder();
   }
 
   static PagerDutyEventPayload.Builder build(final PagerDutyEventPayload prototype) {
-    return prototype == null ? build() : new PagerDutyEventPayloadVal.PagerDutyEventPayloadBuilder(prototype);
+    return prototype == null ? build() : new PagerDutyEventPayloadBuilder(prototype);
   }
+
+  String getDedupKey();
 
   String getSummary();
 
@@ -39,6 +41,8 @@ public interface PagerDutyEventPayload {
   interface Builder extends PagerDutyEventPayload {
 
     PagerDutyEventPayload create();
+
+    Builder dedupKey(final String dedupKey);
 
     Builder summary(final String summary);
 

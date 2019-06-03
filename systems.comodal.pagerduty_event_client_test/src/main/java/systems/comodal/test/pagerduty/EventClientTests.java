@@ -6,12 +6,15 @@ import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
 import systems.comodal.pagerduty.event.data.*;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class EventClientTests implements EventClientTest {
+
+  private final String dedupKey = UUID.randomUUID().toString();
 
   @Override
   public void createContext(final HttpServer httpServer,
@@ -30,6 +33,7 @@ public final class EventClientTests implements EventClientTest {
       assertEquals("application/json", headers.getFirst("Content-Type"));
       assertEquals("Token token=" + authToken, headers.getFirst("Authorization"));
       assertEquals("application/vnd.pagerduty+json;version=2", headers.getFirst("Accept"));
+      assertEquals(routingKey, headers.getFirst("X-Routing-Key"));
 
       final var body = new String(httpExchange.getRequestBody().readAllBytes());
       if (body.startsWith("{\"event_action\":\"trigger")) {
@@ -37,32 +41,27 @@ public final class EventClientTests implements EventClientTest {
             "{\"summary\":\"test-summary\",\"source\":\"test-source\",\"severity\":\"critical\",\"timestamp\":\"2018-08-01T02:03:04Z\",\"component\":\"test-component\",\"group\":\"test-group\",\"class\":\"test-class\"," +
             "\"custom_details\":{\"test-num-metric\":1,\"test-string-metric\":\"val\"}" +
             "},\"routing_key\":\"" + routingKey +
+            "\",\"dedup_key\":\"" + dedupKey +
             "\",\"client\":\"" + clientName +
             "\",\"images\":[{\"src\":\"https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png\",\"href\":\"https://www.pagerduty.com/\",\"alt\":\"pagerduty\"}]" +
             ",\"links\":[{\"href\":\"https://github.com/comodal/pagerduty-client\",\"text\":\"Github pagerduty-client\"}]}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\"}");
-        return;
+        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+      } else if (body.endsWith("acknowledge\"}")) {
+        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + "\",\"event_action\":\"acknowledge\"}", body);
+        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+      } else if (body.endsWith("resolve\"}")) {
+        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + "\",\"event_action\":\"resolve\"}", body);
+        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+      } else {
+        fail("Invalid request body: " + body);
       }
-
-      if (body.endsWith("acknowledge\"}")) {
-        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\",\"event_action\":\"acknowledge\"}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\"}");
-        return;
-      }
-
-      if (body.endsWith("resolve\"}")) {
-        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\",\"event_action\":\"resolve\"}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"030a787c595b4e2cb7d7702c0c978996\"}");
-        return;
-      }
-
-      fail("Invalid request body: " + body);
     });
   }
 
   @Override
   public void test(final PagerDutyEventClient client) {
     final var payload = PagerDutyEventPayload.build()
+        .dedupKey(dedupKey)
         .summary("test-summary")
         .source("test-source")
         .severity(PagerDutySeverity.critical)
@@ -86,16 +85,16 @@ public final class EventClientTests implements EventClientTest {
     final var response = client.triggerDefaultRouteEvent(payload).join();
     validateResponse(response);
 
-    final var ackResponse = client.acknowledgeEvent(response.getDedupeKey()).join();
+    final var ackResponse = client.acknowledgeEvent(response.getDedupKey()).join();
     validateResponse(ackResponse);
 
-    final var resolveResponse = client.resolveEvent(response.getDedupeKey()).join();
+    final var resolveResponse = client.resolveEvent(response.getDedupKey()).join();
     validateResponse(resolveResponse);
   }
 
   private void validateResponse(final PagerDutyEventResponse response) {
     assertEquals("success", response.getStatus());
     assertEquals("Event processed", response.getMessage());
-    assertEquals("030a787c595b4e2cb7d7702c0c978996", response.getDedupeKey());
+    assertEquals(dedupKey, response.getDedupKey());
   }
 }

@@ -10,7 +10,7 @@ public interface PagerDutyEventResponse {
 
   String getMessage();
 
-  String getDedupeKey();
+  String getDedupKey();
 
   interface Builder extends PagerDutyEventResponse {
 
@@ -20,6 +20,6 @@ public interface PagerDutyEventResponse {
 
     Builder message(final String message);
 
-    Builder dedupeKey(final String dedupeKey);
+    Builder dedupKey(final String dedupKey);
   }
 }

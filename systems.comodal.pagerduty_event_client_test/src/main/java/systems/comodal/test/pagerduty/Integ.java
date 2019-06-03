@@ -46,10 +46,10 @@ public final class Integ {
     final var triggerResponse = client.triggerDefaultRouteEvent(payload).join();
     System.out.println(triggerResponse);
 
-    final var ackResponse = client.acknowledgeEvent(triggerResponse.getDedupeKey()).join();
+    final var ackResponse = client.acknowledgeEvent(triggerResponse.getDedupKey()).join();
     System.out.println(ackResponse);
 
-    final var resolveResponse = client.resolveEvent(triggerResponse.getDedupeKey()).join();
+    final var resolveResponse = client.resolveEvent(triggerResponse.getDedupKey()).join();
     System.out.println(resolveResponse);
   }
 }

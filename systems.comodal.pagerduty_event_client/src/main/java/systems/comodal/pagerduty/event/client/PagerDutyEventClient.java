@@ -19,43 +19,29 @@ public interface PagerDutyEventClient {
 
   String getDefaultRoutingKey();
 
-  default CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String dedupeKey) {
-    return acknowledgeEvent(getDefaultRoutingKey(), dedupeKey);
+  default CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String dedupKey) {
+    return acknowledgeEvent(getDefaultRoutingKey(), dedupKey);
   }
 
-  CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupeKey);
+  CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupKey);
 
-  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey) {
-    return resolveEvent(getDefaultRoutingKey(), dedupeKey);
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupKey) {
+    return resolveEvent(getDefaultRoutingKey(), dedupKey);
   }
 
-  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupeKey);
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupKey);
 
   default CompletableFuture<PagerDutyEventResponse> triggerDefaultRouteEvent(final PagerDutyEventPayload payload) {
-    return triggerEvent(getDefaultRoutingKey(), null, payload);
+    return triggerEvent(getDefaultRoutingKey(), payload);
   }
 
-
-  default CompletableFuture<PagerDutyEventResponse> triggerDefaultRouteEvent(final String dedupeKey,
-                                                                             final PagerDutyEventPayload payload) {
-    return triggerEvent(getDefaultRoutingKey(), dedupeKey, payload);
-  }
-
-  default CompletableFuture<PagerDutyEventResponse> triggerEvent(final String routingKey,
-                                                                 final PagerDutyEventPayload payload) {
-    return triggerEvent(routingKey, null, payload);
-  }
-
-  default CompletableFuture<PagerDutyEventResponse> triggerEvent(final String routingKey,
-                                                                 final String dedupeKey,
-                                                                 final PagerDutyEventPayload payload) {
-    return triggerEvent(getDefaultClientName(), getDefaultClientUrl(), routingKey, dedupeKey, payload);
+  default CompletableFuture<PagerDutyEventResponse> triggerEvent(final String routingKey, final PagerDutyEventPayload payload) {
+    return triggerEvent(getDefaultClientName(), getDefaultClientUrl(), routingKey, payload);
   }
 
   CompletableFuture<PagerDutyEventResponse> triggerEvent(final String clientName,
                                                          final String clientUrl,
                                                          final String routingKey,
-                                                         final String dedupeKey,
                                                          final PagerDutyEventPayload payload);
 
   interface Builder {
