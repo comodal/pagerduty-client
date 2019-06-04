@@ -8,9 +8,3 @@ project(':systems.comodal.pagerduty_event_client_test').name = 'pagerduty-event-
 
 include 'systems.comodal.pagerduty_event_json_iterator_adapter'
 project(':systems.comodal.pagerduty_event_json_iterator_adapter').name = 'pagerduty-event-json-iterator-adapter'
-
-//sourceControl {
-// gitRepository('https://github.com/comodal/json-iterator.git') {
-//   producesModule("systems.comodal:json-iterator")
-// }
-//}

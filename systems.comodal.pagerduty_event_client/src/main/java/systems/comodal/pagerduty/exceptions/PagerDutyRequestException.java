@@ -22,7 +22,7 @@ public final class PagerDutyRequestException extends RuntimeException implements
 
   @Override
   public boolean canBeRetried() {
-    return httpResponse == null || httpResponse.statusCode() > 400;
+    return httpResponse == null || httpResponse.statusCode() > 404;
   }
 
   public List<String> getErrors() {

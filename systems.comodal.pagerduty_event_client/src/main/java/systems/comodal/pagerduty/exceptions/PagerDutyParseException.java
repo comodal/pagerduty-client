@@ -37,7 +37,7 @@ public final class PagerDutyParseException extends RuntimeException implements P
 
   @Override
   public boolean canBeRetried() {
-    return httpResponse == null || httpResponse.statusCode() > 400;
+    return httpResponse == null || httpResponse.statusCode() > 404;
   }
 
   @Override

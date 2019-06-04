@@ -51,17 +51,26 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
 
   @Override
   public RuntimeException errorResponse(final HttpResponse<InputStream> response) {
+    final var exception = PagerDutyRequestException.build(response);
+    if (response.statusCode() == 429) {
+      throw exception.message("Too many requests").create();
+    }
+    if (response.statusCode() == 404) {
+      throw exception.message(response.request().uri() + " Not Found").create();
+    }
+    if (response.statusCode() == 400) {
+      exception.message("Bad Request - Check that the JSON is valid.");
+    } else if (response.statusCode() == 401) {
+      exception.message("Unauthorized");
+    } else if (response.statusCode() == 402) {
+      exception.message("Payment Required");
+    } else if (response.statusCode() == 403) {
+      exception.message("Forbidden");
+    } else if (response.statusCode() >= 500 && response.statusCode() < 600) {
+      exception.message("Internal Server Error - the PagerDuty server experienced an error while processing the event.");
+    }
     try (final var ji = createInputStreamJsonIterator(response)) {
       try {
-        final var exception = PagerDutyRequestException.build(response);
-        if (response.statusCode() == 429) {
-          throw exception.message("Too many requests").create();
-        }
-        if (response.statusCode() == 400) {
-          exception.message("Bad Request - Check that the JSON is valid.");
-        } else if (response.statusCode() >= 500 && response.statusCode() < 600) {
-          exception.message("Internal Server Error - the PagerDuty server experienced an error while processing the event.");
-        }
         throw adaptException(exception, ji);
       } catch (final RuntimeException runtimeCause) {
         throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
