@@ -31,7 +31,6 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     // System.out.println(new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8));
     // return JsonIterator.parse(responseBytes);
   }
-
 //  private static byte[] slowRead(final InputStream inputStream) {
 //    try (final var byteArrayOutputStream = new ByteArrayOutputStream()) {
 //      inputStream.transferTo(byteArrayOutputStream);
@@ -72,15 +71,19 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     try (final var ji = createInputStreamJsonIterator(response)) {
       try {
         throw adaptException(exception, ji);
+      } catch (final UncheckedIOException ioEx) {
+        throw ioEx;
       } catch (final RuntimeException runtimeCause) {
-        throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
+        try {
+          throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
+        } catch (final RuntimeException ex) {
+          throw new PagerDutyParseException(response, "Failed to adapt error response.", runtimeCause);
+        }
       } finally {
         returnJsonIterator(ji);
       }
     } catch (final IOException ioEx) {
       throw new UncheckedIOException(ioEx);
-    } catch (final RuntimeException runtimeCause) {
-      throw new PagerDutyParseException(response, "Failed to adapt error response.", runtimeCause);
     }
   }
 
@@ -90,15 +93,19 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     try (final var ji = createInputStreamJsonIterator(response)) {
       try {
         return adaptResponse(ji);
+      } catch (final UncheckedIOException ioEx) {
+        throw ioEx;
       } catch (final RuntimeException runtimeCause) {
-        throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
+        try {
+          throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
+        } catch (final RuntimeException ex) {
+          throw new PagerDutyParseException(response, "Failed to adapt event response.", runtimeCause);
+        }
       } finally {
         returnJsonIterator(ji);
       }
     } catch (final IOException ioEx) {
       throw new UncheckedIOException(ioEx);
-    } catch (final RuntimeException runtimeCause) {
-      throw new PagerDutyParseException(response, "Failed to adapt event response.", runtimeCause);
     }
   }
 
