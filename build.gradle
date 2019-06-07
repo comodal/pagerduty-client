@@ -9,9 +9,9 @@ buildscript {
     maven { url = 'https://plugins.gradle.org/m2/' }
   }
   dependencies {
-    classpath "org.javamodularity:moduleplugin:+"
-    classpath "pl.allegro.tech.build:axion-release-plugin:+"
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
+    classpath "org.javamodularity:moduleplugin:1.5.0"
+    classpath "pl.allegro.tech.build:axion-release-plugin:1.10.1"
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
   }
 }
 
@@ -71,6 +71,9 @@ subprojects {
       events "passed", "skipped", "failed", "standardOut", "standardError"
       exceptionFormat "full"
       showStandardStreams true
+    }
+    moduleOptions {
+      runOnClasspath = true
     }
   }
 
