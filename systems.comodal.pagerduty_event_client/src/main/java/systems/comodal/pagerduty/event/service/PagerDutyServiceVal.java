@@ -38,45 +38,45 @@ final class PagerDutyServiceVal implements PagerDutyService {
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                                 final long stepDelay,
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
-    return triggerResponse == null ? null
-        : resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
+    return dedupeKey == null ? null
+        : resolveEvent(dedupeKey, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                                 final Duration giveUpAfter,
                                                                 final long stepDelay,
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
-    if (triggerResponse == null) {
+    if (dedupeKey == null) {
       return null;
     }
     final int maxRetries = (int) Math.min(Integer.MAX_VALUE, giveUpAfter.toMillis() / timeUnit.toMillis(stepDelay));
-    return resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+    return resolveEvent(dedupeKey, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                                 final int maxRetries,
                                                                 final long stepDelay,
                                                                 final long maxDelay,
                                                                 final TimeUnit timeUnit) {
-    return triggerResponse == null ? null
-        : resolveEvent(triggerResponse, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+    return dedupeKey == null ? null
+        : resolveEvent(dedupeKey, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                                 final LongUnaryOperator retryDelayFn,
                                                                 final TimeUnit timeUnit) {
-    return triggerResponse == null ? null : resolveEvent(triggerResponse, 0, retryDelayFn, timeUnit);
+    return dedupeKey == null ? null : resolveEvent(dedupeKey, 0, retryDelayFn, timeUnit);
   }
 
-  private CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  private CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                                  final int retry,
                                                                  final LongUnaryOperator retryDelayFn,
                                                                  final TimeUnit timeUnit) {
@@ -84,13 +84,13 @@ final class PagerDutyServiceVal implements PagerDutyService {
     if (retryDelay < 0) {
       return null;
     }
-    final var responseFuture = client.resolveEvent(triggerResponse.getDedupKey());
+    final var responseFuture = client.resolveEvent(dedupeKey);
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
       log.log(ERROR, format("Failed %d time(s), last delay was %d %s, to resolve event with dedupe key '%s'.",
-          numFailures, retryDelay, triggerResponse.getDedupKey(), timeUnit), throwable);
+          numFailures, retryDelay, dedupeKey, timeUnit), throwable);
       return canBeRetried(throwable)
-          ? resolveEvent(triggerResponse, numFailures, retryDelayFn, timeUnit)
+          ? resolveEvent(dedupeKey, numFailures, retryDelayFn, timeUnit)
           : null;
     };
     if (retryDelay > 0) {

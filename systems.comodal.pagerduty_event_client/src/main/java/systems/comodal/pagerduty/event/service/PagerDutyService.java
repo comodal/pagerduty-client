@@ -31,24 +31,53 @@ public interface PagerDutyService {
 
   PagerDutyEventPayload getEventPrototype();
 
-  CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                                 final long stepDelay,
+                                                                 final long maxDelay,
+                                                                 final TimeUnit timeUnit) {
+    return triggerResponse == null ? null : resolveEvent(triggerResponse.getDedupKey(), stepDelay, maxDelay, timeUnit);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                          final long stepDelay,
                                                          final long maxDelay,
                                                          final TimeUnit timeUnit);
 
-  CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                                 final Duration giveUpAfter,
+                                                                 final long stepDelay,
+                                                                 final long maxDelay,
+                                                                 final TimeUnit timeUnit) {
+    return triggerResponse == null ? null : resolveEvent(triggerResponse.getDedupKey(), giveUpAfter, stepDelay, maxDelay, timeUnit);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                          final Duration giveUpAfter,
                                                          final long stepDelay,
                                                          final long maxDelay,
                                                          final TimeUnit timeUnit);
 
-  CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                                 final int maxRetries,
+                                                                 final long stepDelay,
+                                                                 final long maxDelay,
+                                                                 final TimeUnit timeUnit) {
+    return triggerResponse == null ? null : resolveEvent(triggerResponse.getDedupKey(), maxRetries, stepDelay, maxDelay, timeUnit);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                          final int maxRetries,
                                                          final long stepDelay,
                                                          final long maxDelay,
                                                          final TimeUnit timeUnit);
 
-  CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+  default CompletableFuture<PagerDutyEventResponse> resolveEvent(final PagerDutyEventResponse triggerResponse,
+                                                                 final LongUnaryOperator retryDelayFn,
+                                                                 final TimeUnit timeUnit) {
+    return triggerResponse == null ? null : resolveEvent(triggerResponse.getDedupKey(), retryDelayFn, timeUnit);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> resolveEvent(final String dedupeKey,
                                                          final LongUnaryOperator retryDelayFn,
                                                          final TimeUnit timeUnit);
 
