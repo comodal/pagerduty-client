@@ -109,13 +109,13 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
 
   private Builder customDetailsObject(final String field, final Object fieldValue) {
     if (customDetails == null || customDetails.isEmpty()) {
-      customDetails = Map.of(field, fieldValue);
+      customDetails = Map.of(field, fieldValue == null ? "null" : fieldValue);
       return this;
     }
     if (customDetails.size() == 1) {
       customDetails = new LinkedHashMap<>(customDetails);
     }
-    customDetails.put(field, fieldValue);
+    customDetails.put(field, fieldValue == null ? "null" : fieldValue);
     return this;
   }
 
