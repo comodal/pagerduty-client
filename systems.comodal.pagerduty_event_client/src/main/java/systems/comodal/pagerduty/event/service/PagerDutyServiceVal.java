@@ -17,7 +17,7 @@ import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
 final class PagerDutyServiceVal implements PagerDutyService {
 
-  private static final System.Logger log = System.getLogger(PagerDutyService.class.getSimpleName());
+  private static final System.Logger log = System.getLogger(PagerDutyService.class.getName());
 
   private final PagerDutyEventClient client;
   private final PagerDutyEventPayload eventPrototype;
