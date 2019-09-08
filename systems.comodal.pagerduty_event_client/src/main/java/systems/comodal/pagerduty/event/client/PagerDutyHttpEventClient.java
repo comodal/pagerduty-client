@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
-import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
+import static java.net.http.HttpResponse.BodyHandlers.ofByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class PagerDutyHttpEventClient implements PagerDutyEventClient {
@@ -114,7 +114,7 @@ final class PagerDutyHttpEventClient implements PagerDutyEventClient {
   }
 
   private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String routingKey, final String jsonBody) {
-    return httpClient.sendAsync(createRequest(routingKey, jsonBody), ofInputStream())
+    return httpClient.sendAsync(createRequest(routingKey, jsonBody), ofByteArray())
         .thenApplyAsync(adapter::adaptResponse);
   }
 

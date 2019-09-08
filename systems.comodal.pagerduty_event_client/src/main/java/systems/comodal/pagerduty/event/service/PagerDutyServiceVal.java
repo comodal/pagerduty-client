@@ -17,7 +17,7 @@ import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
 final class PagerDutyServiceVal implements PagerDutyService {
 
-  private static final System.Logger log = System.getLogger(PagerDutyService.class.getName());
+  private static final System.Logger log = System.getLogger(PagerDutyService.class.getPackageName());
 
   private final PagerDutyEventClient client;
   private final PagerDutyEventPayload eventPrototype;
@@ -35,6 +35,26 @@ final class PagerDutyServiceVal implements PagerDutyService {
   @Override
   public PagerDutyEventPayload getEventPrototype() {
     return eventPrototype;
+  }
+
+  private void logFailure(final Throwable throwable,
+                          final int numFailures,
+                          final long retryDelay,
+                          final TimeUnit timeUnit,
+                          final String context) {
+    if (throwable.getCause() instanceof PagerDutyClientException) {
+      final var pdException = (PagerDutyClientException) throwable.getCause();
+      log.log(ERROR, format("Http Error Code: %s, Service Error Code: %s, Failure Count: %d, Last Delay: %d %s, Service Errors: %s, %s",
+          pdException.getHttpResponse() == null ? "?" : String.valueOf(pdException.getHttpResponse().statusCode()),
+          pdException.getErrorCode() == 0 ? "?" : String.valueOf(pdException.getErrorCode()),
+          numFailures,
+          retryDelay, timeUnit,
+          pdException.getErrors().toString(),
+          context), throwable.getCause());
+    } else {
+      log.log(ERROR, format("Failure Count: %d, Last Delay: %d %s, %s",
+          numFailures, retryDelay, timeUnit, context), throwable.getCause());
+    }
   }
 
   @Override
@@ -87,8 +107,7 @@ final class PagerDutyServiceVal implements PagerDutyService {
     final var responseFuture = client.resolveEvent(dedupeKey);
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
-      log.log(ERROR, format("Failed %d time(s), last delay was %d %s, to resolve event with dedupe key '%s'.",
-          numFailures, retryDelay, dedupeKey, timeUnit), throwable);
+      logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to resolve event with dedupe key '%s'.", dedupeKey));
       return canBeRetried(throwable)
           ? resolveEvent(dedupeKey, numFailures, retryDelayFn, timeUnit)
           : null;
@@ -100,10 +119,13 @@ final class PagerDutyServiceVal implements PagerDutyService {
   }
 
   private static boolean canBeRetried(final Throwable throwable) {
-    if (throwable instanceof PagerDutyClientException && !((PagerDutyClientException) throwable).canBeRetried()) {
-      return false;
+    if (throwable instanceof PagerDutyClientException) {
+      return ((PagerDutyClientException) throwable).canBeRetried();
+    } else if ((throwable.getCause() instanceof PagerDutyClientException)) {
+      return ((PagerDutyClientException) throwable.getCause()).canBeRetried();
+    } else {
+      return true;
     }
-    return !(throwable.getCause() instanceof PagerDutyClientException) || ((PagerDutyClientException) throwable.getCause()).canBeRetried();
   }
 
   @Override
@@ -148,8 +170,7 @@ final class PagerDutyServiceVal implements PagerDutyService {
     final var responseFuture = client.triggerDefaultRouteEvent(payload);
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
-      log.log(ERROR, format("Failed %d time(s), last delay was %d %s, to trigger event:%n%s%n",
-          numFailures, retryDelay, payload, timeUnit), throwable);
+      logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to trigger event:%n  %s", payload));
       return canBeRetried(throwable)
           ? triggerEvent(payload, numFailures, retryDelayFn, timeUnit)
           : null;

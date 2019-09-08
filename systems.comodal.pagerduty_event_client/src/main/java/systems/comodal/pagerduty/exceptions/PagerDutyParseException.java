@@ -1,6 +1,7 @@
 package systems.comodal.pagerduty.exceptions;
 
 import java.net.http.HttpResponse;
+import java.util.List;
 
 public final class PagerDutyParseException extends RuntimeException implements PagerDutyClientException {
 
@@ -37,12 +38,24 @@ public final class PagerDutyParseException extends RuntimeException implements P
 
   @Override
   public boolean canBeRetried() {
-    return httpResponse == null || httpResponse.statusCode() > 404;
+    return httpResponse == null
+        || httpResponse.statusCode() >= 500
+        || httpResponse.statusCode() == 429;
   }
 
   @Override
   public HttpResponse<?> getHttpResponse() {
     return httpResponse;
+  }
+
+  @Override
+  public long getErrorCode() {
+    return 0;
+  }
+
+  @Override
+  public List<String> getErrors() {
+    return List.of();
   }
 
   public String getBuffer() {

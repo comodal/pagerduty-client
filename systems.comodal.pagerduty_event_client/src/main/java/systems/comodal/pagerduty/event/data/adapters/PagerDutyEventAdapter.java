@@ -2,19 +2,18 @@ package systems.comodal.pagerduty.event.data.adapters;
 
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 
-import java.io.InputStream;
 import java.net.http.HttpResponse;
 
 public interface PagerDutyEventAdapter {
 
-  default void verifyHttpResponseCode(final HttpResponse<InputStream> response) {
+  default void verifyHttpResponseCode(final HttpResponse<byte[]> response) {
     final var code = response.statusCode();
     if (code < 200 || code >= 300) {
       throw errorResponse(response);
     }
   }
 
-  RuntimeException errorResponse(final HttpResponse<InputStream> response);
+  RuntimeException errorResponse(final HttpResponse<byte[]> response);
 
-  PagerDutyEventResponse adaptResponse(final HttpResponse<InputStream> response);
+  PagerDutyEventResponse adaptResponse(final HttpResponse<byte[]> response);
 }
