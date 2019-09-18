@@ -125,6 +125,11 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
+  public Builder customDetails(final String field, final Boolean fieldValue) {
+    return customDetailsObject(field, fieldValue);
+  }
+
+  @Override
   public Builder customDetails(final String field, final Number fieldValue) {
     return customDetailsObject(field, fieldValue);
   }

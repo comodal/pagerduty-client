@@ -4,9 +4,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
+
+  private static final Pattern ESCAPE_QUOTES = Pattern.compile("([^\\\\])\"");
 
   private final String dedupKey;
   private final String summary;
@@ -19,6 +22,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
   private final Map<String, Object> customDetails;
   private final List<PagerDutyLinkRef> links;
   private final List<PagerDutyImageRef> images;
+  private final String json;
 
   PagerDutyEventPayloadVal(final String dedupKey,
                            final String summary,
@@ -42,6 +46,34 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     this.customDetails = customDetails;
     this.links = links;
     this.images = images;
+    this.json = "{\"summary\":\"" + summary
+        + "\",\"source\":\"" + source
+        + "\",\"severity\":\"" + severity
+        + "\",\"timestamp\":\"" + timestamp
+        + (component == null ? '"' : "\",\"component\":\"" + component + '"')
+        + (group == null ? "" : ",\"group\":\"" + group + '"')
+        + (type == null ? "" : ",\"class\":\"" + type + '"')
+        + (customDetails.isEmpty() ? "" : ",\"custom_details\":" + toJson(customDetails))
+        + '}';
+  }
+
+  static String toJson(final Map<String, Object> object) {
+    return object.entrySet().stream().map(entry -> {
+      final var val = entry.getValue();
+      if (val instanceof Number) {
+        return '"' + entry.getKey() + "\":" + val;
+      } else if (val instanceof Boolean) {
+        return '"' + entry.getKey() + "\":" + val;
+      } else {
+        final var str = val.toString();
+        if (str.indexOf('"') >= 0) {
+          final var escaped = ESCAPE_QUOTES.matcher(str).replaceAll("$1\\\\\"");
+          return '"' + entry.getKey() + "\":\"" + escaped + '"';
+        } else {
+          return '"' + entry.getKey() + "\":\"" + str + '"';
+        }
+      }
+    }).collect(Collectors.joining(",", "{", "}"));
   }
 
   @Override
@@ -101,25 +133,7 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
 
   @Override
   public String getPayloadJson() {
-    return "{\"summary\":\"" + summary
-        + "\",\"source\":\"" + source
-        + "\",\"severity\":\"" + severity
-        + "\",\"timestamp\":\"" + timestamp
-        + (component == null ? '"' : "\",\"component\":\"" + component + '"')
-        + (group == null ? "" : ",\"group\":\"" + group + '"')
-        + (type == null ? "" : ",\"class\":\"" + type + '"')
-        + (customDetails.isEmpty() ? "" : ",\"custom_details\":" + toJson(customDetails))
-        + '}';
-  }
-
-  static String toJson(final Map<String, Object> object) {
-    return object.entrySet().stream().map(entry -> {
-      final var val = entry.getValue();
-      if (val instanceof Number) {
-        return '"' + entry.getKey() + "\":" + val;
-      }
-      return '"' + entry.getKey() + "\":\"" + val + '"';
-    }).collect(Collectors.joining(",", "{", "}"));
+    return json;
   }
 
   @Override

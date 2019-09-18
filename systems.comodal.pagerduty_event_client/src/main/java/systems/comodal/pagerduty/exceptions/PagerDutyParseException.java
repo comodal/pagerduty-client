@@ -24,6 +24,12 @@ public final class PagerDutyParseException extends RuntimeException implements P
     this.buffer = null;
   }
 
+  public PagerDutyParseException(final HttpResponse<?> httpResponse, final String message) {
+    super(message);
+    this.httpResponse = httpResponse;
+    this.buffer = null;
+  }
+
   public PagerDutyParseException(final HttpResponse<?> httpResponse, final Throwable cause) {
     super(cause);
     this.httpResponse = httpResponse;

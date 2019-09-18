@@ -60,6 +60,8 @@ public interface PagerDutyEventPayload {
 
     Builder customDetails(final String field, final String fieldValue);
 
+    Builder customDetails(final String field, final Boolean fieldValue);
+
     Builder customDetails(final String field, final Number fieldValue);
 
     Builder link(final PagerDutyLinkRef link);

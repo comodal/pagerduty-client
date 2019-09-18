@@ -42,16 +42,16 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     final var ji = JsonIterator.parse(response.body());
     final RuntimeException responseError;
     try {
-      if (ji.skipUntil("error") == null) {
-        responseError = new PagerDutyParseException(response, "Failed to adapt error response.", new String(response.body()));
-      } else {
-        responseError = ji.testObject(exception, EXCEPTION_PARSER).create();
-      }
+      responseError = ji.testObject(exception, EXCEPTION_PARSER).create();
     } catch (final RuntimeException runtimeCause) {
       try {
-        throw new PagerDutyParseException(response, runtimeCause, ji.currentBuffer());
+        throw new PagerDutyParseException(response,
+            String.format("Failed to adapt %d error response: '%s'", response.statusCode(), ji.currentBuffer()),
+            runtimeCause);
       } catch (final RuntimeException ex) {
-        throw new PagerDutyParseException(response, "Failed to adapt error response.", runtimeCause);
+        throw new PagerDutyParseException(response,
+            String.format("Failed to adapt %d error response: '%s'", response.statusCode(), new String(response.body())),
+            runtimeCause);
       }
     }
     throw responseError;

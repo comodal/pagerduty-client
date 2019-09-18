@@ -46,9 +46,9 @@ subprojects {
   }
 
   repositories {
-    mavenCentral()
-    jcenter()
     maven { url = 'https://dl.bintray.com/comodal/libraries' }
+    jcenter()
+    mavenCentral()
   }
 
   configurations.all {
