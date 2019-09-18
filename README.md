@@ -1,4 +1,4 @@
-# PagerDuty Event Client [![Download](https://api.bintray.com/packages/comodal/libraries/pagerduty-event-client/images/download.svg)](https://bintray.com/comodal/libraries/pagerduty-event-client/_latestVersion)
+# PagerDuty Event Client  [![Build](https://github.com/comodal/pagerduty-client/workflows/CI/badge.svg)](https://github.com/comodal/pagerduty-client/actions) [![Download](https://api.bintray.com/packages/comodal/libraries/pagerduty-event-client/images/download.svg)](https://bintray.com/comodal/libraries/pagerduty-event-client/_latestVersion)
 
 This client aims to be compliant with the latest GA JDK and [PagerDuty Event API](https://v2.developer.pagerduty.com/docs/events-api-v2), currently JDK12 and V2 respectively.
 
