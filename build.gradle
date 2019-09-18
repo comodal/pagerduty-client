@@ -77,18 +77,18 @@ subprojects {
     }
   }
 
-  task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier = 'sources'
+  task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
+    archiveClassifier.set('sources')
   }
 
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
+  task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
   }
 
-  artifacts {
-    archives sourcesJar
+  javadoc {
+    options.addBooleanOption('html5', true)
   }
 
   publishing {
@@ -96,9 +96,30 @@ subprojects {
       mavenJava(MavenPublication) {
         from components.java
         artifact sourcesJar
+        artifact javadocJar
         groupId project.group
         artifactId project.name
         version = project.version
+        pom {
+          name = project.name
+          description = project.desc
+          url = project.vcsUrl
+          licenses {
+            license {
+              name = 'Apache License 2.0'
+              url = 'https://github.com/comodal/pagerduty-client/blob/master/LICENSE'
+            }
+          }
+          developers {
+            developer {
+              email = 'james.p.edwards42@gmail.com'
+            }
+          }
+          scm {
+            connection = 'scm:git:git@github.com:comodal/pagerduty-client.git'
+            url = project.vcsUrl
+          }
+        }
       }
     }
   }
