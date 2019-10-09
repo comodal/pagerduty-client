@@ -1,17 +1,17 @@
 buildscript {
   configurations.all {
     resolutionStrategy {
-      cacheDynamicVersionsFor 3, 'minutes'
-      cacheChangingModulesFor 3, 'minutes'
+      cacheDynamicVersionsFor 180, 'minutes'
+      cacheChangingModulesFor 180, 'minutes'
     }
   }
   repositories {
     maven { url = 'https://plugins.gradle.org/m2/' }
   }
   dependencies {
-    classpath "org.javamodularity:moduleplugin:1.6.0"
-    classpath "pl.allegro.tech.build:axion-release-plugin:1.10.2"
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+    classpath "org.javamodularity:moduleplugin:+"
+    classpath "pl.allegro.tech.build:axion-release-plugin:+"
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
   }
 }
 
