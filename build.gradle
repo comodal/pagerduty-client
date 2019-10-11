@@ -36,7 +36,7 @@ subprojects {
   project.group = 'systems.comodal'
   project.version = scmVersion.version
 
-  sourceCompatibility = JavaVersion.VERSION_12
+  sourceCompatibility = JavaVersion.toVersion("${project.findProperty('targetJava') ?: '13'}")
 
   ext {
     desc = 'Pagerduty Event Client'
@@ -151,5 +151,29 @@ subprojects {
         }
       }
     }
+  }
+
+  // https://docs.gradle.org/5.6.2/userguide/building_java_projects.html#sec:java_cross_compilation
+  def javaHomePath = new File("${project.findProperty('javaHome') ?: System.getenv('JAVA_HOME')}")
+  def javaExecutables = [:].withDefault { execName ->
+    def executable = new File(javaHomePath, "bin/${execName}")
+    assert executable.exists(): "There is no ${execName} executable in ${javaHomePath}/bin"
+    executable
+  }
+
+  tasks.withType(AbstractCompile) {
+    options.with {
+      fork = true
+      forkOptions.javaHome = javaHomePath
+    }
+  }
+  tasks.withType(Javadoc) {
+    executable = javaExecutables.javadoc
+  }
+  tasks.withType(Test) {
+    executable = javaExecutables.java
+  }
+  tasks.withType(JavaExec) {
+    executable = javaExecutables.java
   }
 }
