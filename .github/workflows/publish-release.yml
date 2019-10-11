@@ -13,6 +13,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 12
+      - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 13
       - uses: eskatos/gradle-command-action@v1
         with:
           arguments: check --stacktrace
