@@ -24,6 +24,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 13
+      - run: java --version
       - uses: eskatos/gradle-command-action@v1
         with:
           arguments: check --stacktrace

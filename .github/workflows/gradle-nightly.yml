@@ -18,15 +18,17 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 13
-      - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
-      - run: curl -LfSo ./openjdk.tar.gz "https://download.java.net/java/early_access/jdk${JDK_VERSION}/${JDK_BUILD}/GPL/openjdk-${JDK_VERSION}-ea+${JDK_BUILD}_linux-x64_bin.tar.gz"
+      - run: |
+        printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
+        curl -LfSo ./openjdk.tar.gz "https://download.java.net/java/early_access/jdk${JDK_VERSION}/${JDK_BUILD}/GPL/openjdk-${JDK_VERSION}-ea+${JDK_BUILD}_linux-x64_bin.tar.gz"
       - uses: actions/setup-java@v1
         with:
           java-version: 14
           architecture: x64
           jdkFile: ./openjdk.tar.gz
+      - run: java --version
       - uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: nightly
-          arguments: check  --warning-mode=all --stacktrace
+          arguments: check  -PtargetJava=14 --warning-mode=all --stacktrace
 
