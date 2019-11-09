@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JDK_VERSION: 14
-      JDK_BUILD: 14
+      JDK_BUILD: 22
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-java@v1
