@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 13
+          java-package: jre
       - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
 
       - uses: actions/setup-java@v1
@@ -32,3 +33,5 @@ jobs:
         with:
           gradle-version: nightly
           arguments: check  -PtargetJava=14 --warning-mode=all --stacktrace
+
+      - uses: gradle/wrapper-validation-action@v1
