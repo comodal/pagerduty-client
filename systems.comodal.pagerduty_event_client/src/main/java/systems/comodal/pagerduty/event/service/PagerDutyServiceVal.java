@@ -108,14 +108,23 @@ final class PagerDutyServiceVal implements PagerDutyService {
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
       logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to resolve event with dedupe key '%s'.", dedupeKey));
-      return canBeRetried(throwable)
-          ? resolveEvent(dedupeKey, numFailures, retryDelayFn, timeUnit)
-          : null;
+      if (canBeRetried(throwable)) {
+        return resolveEvent(dedupeKey, numFailures, retryDelayFn, timeUnit);
+      } else if (throwable instanceof RuntimeException) {
+        throw (RuntimeException) throwable;
+      } else if (throwable.getCause() instanceof RuntimeException) {
+        throw (RuntimeException) throwable.getCause();
+      } else if (throwable.getCause() == null) {
+        throw new RuntimeException(throwable);
+      } else {
+        throw new RuntimeException(throwable.getCause());
+      }
     };
     if (retryDelay > 0) {
       return responseFuture.exceptionallyComposeAsync(exceptionally, delayedExecutor(retryDelay, timeUnit));
+    } else {
+      return responseFuture.exceptionallyCompose(exceptionally);
     }
-    return responseFuture.exceptionallyCompose(exceptionally);
   }
 
   private static boolean canBeRetried(final Throwable throwable) {
@@ -171,14 +180,23 @@ final class PagerDutyServiceVal implements PagerDutyService {
     final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
       final int numFailures = retry + 1;
       logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to trigger event:%n  %s", payload));
-      return canBeRetried(throwable)
-          ? triggerEvent(payload, numFailures, retryDelayFn, timeUnit)
-          : null;
+      if (canBeRetried(throwable)) {
+        return triggerEvent(payload, numFailures, retryDelayFn, timeUnit);
+      } else if (throwable instanceof RuntimeException) {
+        throw (RuntimeException) throwable;
+      } else if (throwable.getCause() instanceof RuntimeException) {
+        throw (RuntimeException) throwable.getCause();
+      } else if (throwable.getCause() == null) {
+        throw new RuntimeException(throwable);
+      } else {
+        throw new RuntimeException(throwable.getCause());
+      }
     };
     if (retryDelay > 0) {
       return responseFuture.exceptionallyComposeAsync(exceptionally, delayedExecutor(retryDelay, timeUnit));
+    } else {
+      return responseFuture.exceptionallyCompose(exceptionally);
     }
-    return responseFuture.exceptionallyCompose(exceptionally);
   }
 
   @Override
