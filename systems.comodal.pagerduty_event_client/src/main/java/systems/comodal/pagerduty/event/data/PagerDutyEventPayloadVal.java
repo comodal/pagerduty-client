@@ -4,12 +4,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
-
-  private static final Pattern ESCAPE_QUOTES = Pattern.compile("([^\\\\])\"");
 
   private final String dedupKey;
   private final String summary;
@@ -57,21 +54,44 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
         + '}';
   }
 
+  private static String escapeQuotes(final String str) {
+    final char[] chars = str.toCharArray();
+    final char[] escaped = new char[chars.length << 1];
+    char c;
+    for (int escapes = 0, from = 0, dest = 0, to = 0; ; to++) {
+      if (to == chars.length) {
+        final int len = to - from;
+        if (len > 0) {
+          System.arraycopy(chars, from, escaped, dest, len);
+          dest += len;
+        }
+        return new String(escaped, 0, dest);
+      } else {
+        c = chars[to];
+        if (c == '\\') {
+          escapes++;
+        } else if (c == '"' && (escapes & 1) == 0) {
+          final int len = to - from;
+          System.arraycopy(chars, from, escaped, dest, len);
+          dest += len;
+          escaped[dest++] = '\\';
+          from = to;
+          escapes = 0;
+        } else {
+          escapes = 0;
+        }
+      }
+    }
+  }
+
   static String toJson(final Map<String, Object> object) {
     return object.entrySet().stream().map(entry -> {
       final var val = entry.getValue();
-      if (val instanceof Number) {
-        return '"' + entry.getKey() + "\":" + val;
-      } else if (val instanceof Boolean) {
+      if (val instanceof Number || val instanceof Boolean) {
         return '"' + entry.getKey() + "\":" + val;
       } else {
         final var str = val.toString();
-        if (str.indexOf('"') >= 0) {
-          final var escaped = ESCAPE_QUOTES.matcher(str).replaceAll("$1\\\\\"");
-          return '"' + entry.getKey() + "\":\"" + escaped + '"';
-        } else {
-          return '"' + entry.getKey() + "\":\"" + str + '"';
-        }
+        return '"' + entry.getKey() + "\":\"" + (str.indexOf('"') < 0 ? str : escapeQuotes(str)) + '"';
       }
     }).collect(Collectors.joining(",", "{", "}"));
   }
