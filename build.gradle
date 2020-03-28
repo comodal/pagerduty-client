@@ -60,7 +60,7 @@ subprojects {
   project.group = 'systems.comodal'
   project.version = scmVersion.version
 
-  sourceCompatibility = JavaVersion.toVersion("${project.findProperty('targetJava') ?: '14'}")
+  sourceCompatibility = JavaVersion.toVersion(project.findProperty('targetJava') ?: JavaVersion.VERSION_14)
 
   ext {
     desc = 'Pagerduty Event Client'

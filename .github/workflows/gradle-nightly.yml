@@ -26,12 +26,12 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 14-ea
+          java-version: 15-ea
       - run: java --version
 
       - uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: nightly
-          arguments: check  -PtargetJava=14 --warning-mode=all --stacktrace
+          arguments: check  -PtargetJava=15 --warning-mode=all --stacktrace
 
       - uses: gradle/wrapper-validation-action@v1
