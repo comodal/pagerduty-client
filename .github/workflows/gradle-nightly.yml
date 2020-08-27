@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 13
+          java-version: 14
           java-package: jre
       - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
 
@@ -32,6 +32,6 @@ jobs:
       - uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: nightly
-          arguments: check  -PtargetJava=15 --warning-mode=all --stacktrace
+          arguments: check -PtargetJava=15 --warning-mode=all --stacktrace
 
       - uses: gradle/wrapper-validation-action@v1
