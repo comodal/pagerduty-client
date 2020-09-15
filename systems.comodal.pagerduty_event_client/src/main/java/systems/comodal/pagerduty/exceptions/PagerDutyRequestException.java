@@ -85,9 +85,8 @@ public final class PagerDutyRequestException extends RuntimeException implements
     }
 
     @Override
-    public Builder status(final String status) {
+    public void status(final String status) {
       this.status = status;
-      return this;
     }
 
     @Override
@@ -103,16 +102,17 @@ public final class PagerDutyRequestException extends RuntimeException implements
     }
 
     @Override
-    public Builder error(final String error) {
+    public void error(final String error) {
       if (errors == null) {
         errors = List.of(error);
-        return this;
+        return;
       }
       if (errors.size() == 1) {
-        errors = new ArrayList<>(errors);
+        final var move = errors.get(0);
+        errors = new ArrayList<>(10);
+        errors.add(move);
       }
       errors.add(error);
-      return this;
     }
   }
 
@@ -120,12 +120,12 @@ public final class PagerDutyRequestException extends RuntimeException implements
 
     PagerDutyRequestException create();
 
-    Builder status(final String status);
+    void status(final String status);
 
     Builder message(final String message);
 
     Builder errorCode(final long errorCode);
 
-    Builder error(final String error);
+    void error(final String error);
   }
 }

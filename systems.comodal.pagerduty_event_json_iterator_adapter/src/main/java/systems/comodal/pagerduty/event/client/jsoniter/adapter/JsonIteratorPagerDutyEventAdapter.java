@@ -22,21 +22,20 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
   @Override
   public RuntimeException errorResponse(final HttpResponse<byte[]> response) {
     final var exception = PagerDutyRequestException.build(response);
-    if (response.statusCode() == 429) {
+    final int statusCode = response.statusCode();
+    if (statusCode == 429) {
       throw exception.message("Too many requests").create();
-    }
-    if (response.statusCode() == 404) {
+    } else if (statusCode == 404) {
       throw exception.message(response.request().uri() + " Not Found").create();
-    }
-    if (response.statusCode() == 400) {
+    } else if (statusCode == 400) {
       exception.message("Bad Request - Check that the JSON is valid.");
-    } else if (response.statusCode() == 401) {
+    } else if (statusCode == 401) {
       exception.message("Unauthorized");
-    } else if (response.statusCode() == 402) {
+    } else if (statusCode == 402) {
       exception.message("Payment Required");
-    } else if (response.statusCode() == 403) {
+    } else if (statusCode == 403) {
       exception.message("Forbidden");
-    } else if (response.statusCode() >= 500 && response.statusCode() < 600) {
+    } else if (statusCode >= 500 && statusCode < 600) {
       exception.message("Internal Server Error - the PagerDuty server experienced an error while processing the event.");
     }
     final var ji = JsonIterator.parse(response.body());
@@ -46,11 +45,11 @@ final class JsonIteratorPagerDutyEventAdapter implements PagerDutyEventAdapter {
     } catch (final RuntimeException runtimeCause) {
       try {
         throw new PagerDutyParseException(response,
-            String.format("Failed to adapt %d error response: '%s'", response.statusCode(), ji.currentBuffer()),
+            String.format("Failed to adapt %d error response: '%s'", statusCode, ji.currentBuffer()),
             runtimeCause);
       } catch (final RuntimeException ex) {
         throw new PagerDutyParseException(response,
-            String.format("Failed to adapt %d error response: '%s'", response.statusCode(), new String(response.body())),
+            String.format("Failed to adapt %d error response: '%s'", statusCode, new String(response.body())),
             runtimeCause);
       }
     }
