@@ -108,14 +108,14 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   private Builder customDetailsObject(final String field, final Object fieldValue) {
+    final var val = fieldValue == null ? "null" : fieldValue;
     if (customDetails == null || customDetails.isEmpty()) {
-      customDetails = Map.of(field, fieldValue == null ? "null" : fieldValue);
+      customDetails = Map.of(field, val);
       return this;
-    }
-    if (customDetails.size() == 1) {
+    } else if (customDetails.size() == 1) {
       customDetails = new LinkedHashMap<>(customDetails);
     }
-    customDetails.put(field, fieldValue == null ? "null" : fieldValue);
+    customDetails.put(field, val);
     return this;
   }
 
@@ -135,12 +135,16 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
+  public Builder customDetails(final String field, final Object fieldValue) {
+    return customDetailsObject(field, fieldValue == null ? null : fieldValue.toString());
+  }
+
+  @Override
   public Builder link(final PagerDutyLinkRef link) {
     if (links.isEmpty()) {
       links = List.of(link);
       return this;
-    }
-    if (links.size() == 1) {
+    } else if (links.size() == 1) {
       links = new ArrayList<>(links);
     }
     links.add(link);
@@ -152,8 +156,7 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
     if (images.isEmpty()) {
       images = List.of(image);
       return this;
-    }
-    if (images.size() == 1) {
+    } else if (images.size() == 1) {
       images = new ArrayList<>(images);
     }
     images.add(image);

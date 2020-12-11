@@ -64,6 +64,8 @@ public interface PagerDutyEventPayload {
 
     Builder customDetails(final String field, final Number fieldValue);
 
+    Builder customDetails(final String field, final Object fieldValue);
+
     Builder link(final PagerDutyLinkRef link);
 
     Builder image(final PagerDutyImageRef image);
