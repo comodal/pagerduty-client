@@ -20,12 +20,14 @@ jobs:
 
       - uses: actions/setup-java@v2
         with:
+          distribution: 'zulu'
           java-version: 16
           java-package: jre
       - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
 
       - uses: actions/setup-java@v2
         with:
+          distribution: 'zulu'
           java-version: 17-ea
       - run: printf "\norg.gradle.java.installations.paths=%s" "$JAVA_HOME" >> gradle.properties
       - run: java --version
