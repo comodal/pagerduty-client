@@ -10,7 +10,6 @@ buildscript {
   }
   dependencies {
     classpath "pl.allegro.tech.build:axion-release-plugin:+"
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
   }
 }
 
@@ -26,12 +25,10 @@ scmVersion {
   repository.pushTagsOnly = true
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 15)
+final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 16)
 
 subprojects {
   apply plugin: 'java-library'
-  apply plugin: 'maven-publish'
-  apply plugin: 'com.jfrog.bintray'
 
   plugins.withType(JavaPlugin).configureEach {
     java {
@@ -45,16 +42,7 @@ subprojects {
   project.group = 'systems.comodal'
   project.version = scmVersion.version
 
-  ext {
-    desc = 'Pagerduty Event Client'
-    bintrayOrg = 'comodal'
-    bintrayRepo = 'libraries'
-    vcsUrl = 'https://github.com/comodal/pagerduty-client'
-  }
-
   repositories {
-    maven { url = 'https://dl.bintray.com/comodal/libraries' }
-    jcenter()
     mavenCentral()
   }
 
@@ -93,67 +81,5 @@ subprojects {
 
   javadoc {
     options.addBooleanOption('html5', true)
-  }
-
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
-        artifact sourcesJar
-        artifact javadocJar
-        groupId project.group
-        artifactId project.name
-        version = project.version
-        pom {
-          name = project.name
-          description = project.desc
-          url = project.vcsUrl
-          licenses {
-            license {
-              name = 'Apache License 2.0'
-              url = 'https://github.com/comodal/pagerduty-client/blob/master/LICENSE'
-            }
-          }
-          developers {
-            developer {
-              email = 'james.p.edwards42@gmail.com'
-            }
-          }
-          scm {
-            connection = 'scm:git:git@github.com:comodal/pagerduty-client.git'
-            url = project.vcsUrl
-          }
-        }
-      }
-    }
-  }
-
-  afterEvaluate {
-    bintray {
-      override = true
-      user = project.hasProperty("bintrayUser") ? bintrayUser : System.getenv('BINTRAY_USER')
-      key = project.hasProperty("bintrayApiKey") ? bintrayApiKey : System.getenv('BINTRAY_API_KEY')
-      publications = ['mavenJava']
-      pkg {
-        userOrg = project.bintrayOrg
-        repo = project.bintrayRepo
-        name = project.name
-        desc = project.desc
-        vcsUrl = project.vcsUrl
-        websiteUrl = project.vcsUrl
-        issueTrackerUrl = project.vcsUrl + '/issues'
-        licenses = ["Apache-2.0"]
-        publish = true
-        version {
-          name = project.version
-          vcsTag = project.name + '-' + project.version
-          released = new Date()
-          gpg {
-            sign = true
-            passphrase = project.hasProperty("bintrayGPGPassphrase") ? bintrayGPGPassphrase : System.getenv('BINTRAY_GPG_PASSPHRASE')
-          }
-        }
-      }
-    }
   }
 }
