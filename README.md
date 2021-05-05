@@ -1,5 +1,5 @@
-# PagerDuty Event Client  [![Build](https://github.com/comodal/pagerduty-client/workflows/Gradle%20Check/badge.svg)](https://github.com/comodal/pagerduty-client/actions) [![Download](https://api.bintray.com/packages/comodal/libraries/pagerduty-event-client/images/download.svg)](https://bintray.com/comodal/libraries/pagerduty-event-client/_latestVersion)
- 
+# PagerDuty Event Client
+
 This client aims to be compliant with the latest version of the [PagerDuty Event API](https://v2.developer.pagerduty.com/docs/events-api-v2), currently V2.
 
 ## Hello Event Trigger
