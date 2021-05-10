@@ -29,6 +29,7 @@ final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer
 
 subprojects {
   apply plugin: 'java-library'
+  apply plugin: 'maven-publish'
 
   plugins.withType(JavaPlugin).configureEach {
     java {
@@ -41,6 +42,11 @@ subprojects {
 
   project.group = 'systems.comodal'
   project.version = scmVersion.version
+
+  ext {
+    desc = 'Pagerduty Event Client'
+    vcsUrl = 'https://github.com/comodal/pagerduty-client'
+  }
 
   repositories {
     maven {
@@ -88,5 +94,43 @@ subprojects {
 
   javadoc {
     options.addBooleanOption('html5', true)
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        artifact javadocJar
+        groupId project.group
+        artifactId project.name
+        version = project.version
+        pom {
+          name = project.name
+          description = project.desc
+          url = project.vcsUrl
+          licenses {
+            license {
+              name = 'Apache License 2.0'
+              url = 'https://github.com/comodal/pagerduty-client/blob/master/LICENSE'
+            }
+          }
+          scm {
+            connection = 'scm:git:git@github.com:comodal/pagerduty-client.git'
+            url = project.vcsUrl
+          }
+        }
+      }
+    }
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/comodal/pagerduty-client"
+        credentials {
+          username = System.getenv("GITHUB_ACTOR")
+          password = System.getenv("GITHUB_TOKEN")
+        }
+      }
+    }
   }
 }

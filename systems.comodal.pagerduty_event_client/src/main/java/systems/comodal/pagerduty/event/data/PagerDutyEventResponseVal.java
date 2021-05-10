@@ -1,20 +1,8 @@
 package systems.comodal.pagerduty.event.data;
 
-import java.util.Objects;
-
-final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
-
-  private final String status;
-  private final String message;
-  private final String dedupKey;
-
-  private PagerDutyEventResponseVal(final String status,
-                                    final String message,
-                                    final String dedupKey) {
-    this.status = status;
-    this.message = message;
-    this.dedupKey = dedupKey;
-  }
+final record PagerDutyEventResponseVal(String status,
+                                       String message,
+                                       String dedupKey) implements PagerDutyEventResponse {
 
   @Override
   public String getStatus() {
@@ -29,21 +17,6 @@ final class PagerDutyEventResponseVal implements PagerDutyEventResponse {
   @Override
   public String getDedupKey() {
     return dedupKey;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PagerDutyEventResponseVal that = (PagerDutyEventResponseVal) o;
-    return Objects.equals(status, that.status) &&
-        Objects.equals(message, that.message) &&
-        Objects.equals(dedupKey, that.dedupKey);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(status, message, dedupKey);
   }
 
   static final class PagerDutyEventResponseBuilder implements PagerDutyEventResponse.Builder {

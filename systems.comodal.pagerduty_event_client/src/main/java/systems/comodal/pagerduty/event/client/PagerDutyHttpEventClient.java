@@ -17,31 +17,13 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import static java.net.http.HttpResponse.BodyHandlers.ofByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-final class PagerDutyHttpEventClient implements PagerDutyEventClient {
-
-  private final String defaultClientName;
-  private final String defaultClientUrl;
-  private final String defaultRoutingKey;
-  private final String authorizationHeader;
-  private final URI eventUri;
-  private final HttpClient httpClient;
-  private final PagerDutyEventAdapter adapter;
-
-  PagerDutyHttpEventClient(final String defaultClientName,
-                           final String defaultClientUrl,
-                           final String defaultRoutingKey,
-                           final String authorizationHeader,
-                           final URI eventUri,
-                           final HttpClient httpClient,
-                           final PagerDutyEventAdapter adapter) {
-    this.defaultClientName = defaultClientName;
-    this.defaultClientUrl = defaultClientUrl;
-    this.defaultRoutingKey = defaultRoutingKey;
-    this.authorizationHeader = authorizationHeader;
-    this.eventUri = eventUri;
-    this.httpClient = httpClient;
-    this.adapter = adapter;
-  }
+final record PagerDutyHttpEventClient(String defaultClientName,
+                                      String defaultClientUrl,
+                                      String defaultRoutingKey,
+                                      String authorizationHeader,
+                                      URI eventUri,
+                                      HttpClient httpClient,
+                                      PagerDutyEventAdapter adapter) implements PagerDutyEventClient {
 
   @Override
   public String getDefaultClientName() {

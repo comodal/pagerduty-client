@@ -15,17 +15,10 @@ import static java.lang.String.format;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
-final class PagerDutyServiceVal implements PagerDutyService {
+final record PagerDutyServiceVal(PagerDutyEventClient client,
+                                 PagerDutyEventPayload eventPrototype) implements PagerDutyService {
 
   private static final System.Logger log = System.getLogger(PagerDutyService.class.getPackageName());
-
-  private final PagerDutyEventClient client;
-  private final PagerDutyEventPayload eventPrototype;
-
-  PagerDutyServiceVal(final PagerDutyEventClient client, final PagerDutyEventPayload eventPrototype) {
-    this.client = client;
-    this.eventPrototype = eventPrototype;
-  }
 
   @Override
   public PagerDutyEventClient getClient() {
@@ -42,8 +35,7 @@ final class PagerDutyServiceVal implements PagerDutyService {
                           final long retryDelay,
                           final TimeUnit timeUnit,
                           final String context) {
-    if (throwable.getCause() instanceof PagerDutyClientException) {
-      final var pdException = (PagerDutyClientException) throwable.getCause();
+    if (throwable.getCause() instanceof final PagerDutyClientException pdException) {
       log.log(ERROR, format("Http Error Code: %s, Service Error Code: %s, Failure Count: %d, Last Delay: %d %s, Service Errors: %s, %s",
           pdException.getHttpResponse() == null ? "?" : String.valueOf(pdException.getHttpResponse().statusCode()),
           pdException.getErrorCode() == 0 ? "?" : String.valueOf(pdException.getErrorCode()),
