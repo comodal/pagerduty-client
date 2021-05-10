@@ -43,6 +43,13 @@ subprojects {
   project.version = scmVersion.version
 
   repositories {
+    maven {
+      url = "https://maven.pkg.github.com/comodal/json-iterator"
+      credentials {
+        username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+        password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+      }
+    }
     mavenCentral()
   }
 
