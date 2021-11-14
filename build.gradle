@@ -25,7 +25,7 @@ scmVersion {
   repository.pushTagsOnly = true
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 16)
+final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 17)
 
 subprojects {
   apply plugin: 'java-library'
