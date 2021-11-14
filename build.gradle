@@ -15,7 +15,7 @@ buildscript {
 
 ext {
   // Used by systems.comodal.pagerduty_event_json_iterator_adapter
-  jsoniter = "2.5.+" // https://github.com/comodal/json-iterator/releases
+  jsoniter = "2.6.+" // https://github.com/comodal/json-iterator/releases
 }
 
 apply plugin: 'pl.allegro.tech.build.axion-release'
