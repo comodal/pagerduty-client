@@ -15,7 +15,7 @@ buildscript {
 
 ext {
   // Used by systems.comodal.pagerduty_event_json_iterator_adapter
-  jsoniter = "2.6.+" // https://github.com/comodal/json-iterator/releases
+  jsoniter = "2.7.+" // https://github.com/comodal/json-iterator/releases
 }
 
 apply plugin: 'pl.allegro.tech.build.axion-release'
@@ -25,7 +25,7 @@ scmVersion {
   repository.pushTagsOnly = true
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 17)
+final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 18)
 
 subprojects {
   apply plugin: 'java-library'
