@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: 18
           java-package: jre
           cache: 'gradle'
       - run: printf "org.gradle.java.home=%s" "$JAVA_HOME" > gradle.properties
@@ -33,19 +33,19 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 18
+          java-version: 19
           check-latest: true
       - run: printf "\norg.gradle.java.installations.paths=%s" "$JAVA_HOME" >> gradle.properties
       - run: java --version
 
       - name: Gradle Check
-        run: ./gradlew check -PtargetJava=18 --stacktrace
+        run: ./gradlew check -PtargetJava=19 --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: gradle/wrapper-validation-action@v1
 
       - name: Github Packages
-        run: ./gradlew -PtargetJava=18 :pagerduty-event-json-iterator-adapter:publish :pagerduty-event-client:publish
+        run: ./gradlew -PtargetJava=19 :pagerduty-event-json-iterator-adapter:publish :pagerduty-event-client:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

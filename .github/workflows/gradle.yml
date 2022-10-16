@@ -21,13 +21,13 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: 18
           java-package: jre
           cache: 'gradle'
       - run: java --version
 
       - name: Gradle Check
-        run: ./gradlew -PtargetJava=18 check --stacktrace --no-daemon
+        run: ./gradlew -PtargetJava=19 check --stacktrace --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
