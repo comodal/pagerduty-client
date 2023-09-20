@@ -15,8 +15,8 @@ import static java.lang.String.format;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
-final record PagerDutyServiceVal(PagerDutyEventClient client,
-                                 PagerDutyEventPayload eventPrototype) implements PagerDutyService {
+record PagerDutyServiceVal(PagerDutyEventClient client,
+                           PagerDutyEventPayload eventPrototype) implements PagerDutyService {
 
   private static final System.Logger log = System.getLogger(PagerDutyService.class.getPackageName());
 

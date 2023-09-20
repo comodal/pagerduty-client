@@ -1,8 +1,8 @@
 package systems.comodal.pagerduty.event.data;
 
-final record PagerDutyImageRefVal(String src,
-                                  String href,
-                                  String alt) implements PagerDutyImageRef {
+record PagerDutyImageRefVal(String src,
+                            String href,
+                            String alt) implements PagerDutyImageRef {
 
   @Override
   public String getSrc() {

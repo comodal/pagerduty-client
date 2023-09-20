@@ -1,8 +1,8 @@
 package systems.comodal.pagerduty.event.data;
 
-final record PagerDutyEventResponseVal(String status,
-                                       String message,
-                                       String dedupKey) implements PagerDutyEventResponse {
+record PagerDutyEventResponseVal(String status,
+                                 String message,
+                                 String dedupKey) implements PagerDutyEventResponse {
 
   @Override
   public String getStatus() {
@@ -72,12 +72,5 @@ final record PagerDutyEventResponseVal(String status,
           ", message='" + message + '\'' +
           ", dedupKey='" + dedupKey + '\'' + '}';
     }
-  }
-
-  @Override
-  public String toString() {
-    return "PagerDutyEventResponseVal{status='" + status + '\'' +
-        ", message='" + message + '\'' +
-        ", dedupKey='" + dedupKey + '\'' + '}';
   }
 }

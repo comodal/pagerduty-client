@@ -60,12 +60,14 @@ final class PagerDutyEventPayloadVal implements PagerDutyEventPayload {
     char c;
     for (int escapes = 0, from = 0, dest = 0, to = 0; ; to++) {
       if (to == chars.length) {
-        final int len = to - from;
-        if (len > 0) {
+        if (from == 0) {
+          return str;
+        } else {
+          final int len = to - from;
           System.arraycopy(chars, from, escaped, dest, len);
           dest += len;
+          return new String(escaped, 0, dest);
         }
-        return new String(escaped, 0, dest);
       } else {
         c = chars[to];
         if (c == '\\') {

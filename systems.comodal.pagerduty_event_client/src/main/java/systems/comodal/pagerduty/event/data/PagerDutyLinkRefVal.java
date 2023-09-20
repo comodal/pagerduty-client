@@ -1,6 +1,6 @@
 package systems.comodal.pagerduty.event.data;
 
-final record PagerDutyLinkRefVal(String href, String text) implements PagerDutyLinkRef {
+record PagerDutyLinkRefVal(String href, String text) implements PagerDutyLinkRef {
 
   @Override
   public String getHref() {
