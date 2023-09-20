@@ -295,12 +295,17 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
       final var key = entry.getKey();
       final var val = entry.getValue();
       return switch (val) {
-        case BigDecimal num -> String.format("""
-            "%s":"%s\"""", key, num.toPlainString());
-        case BigInteger num -> String.format("""
-            "%s":"%s\"""", key, num);
-        case Number num -> String.format("""
-            "%s":%s""", key, num);
+        case null -> String.format("""
+            "%s":null""", key);
+        case BigDecimal bigDecimal -> String.format("""
+            "%s":"%s\"""", key, bigDecimal.toPlainString());
+        case BigInteger bigInteger -> String.format("""
+            "%s":"%s\"""", key, bigInteger);
+        case Number number -> String.format("""
+            "%s":%s""", key, number);
+        case Boolean bool -> String.format("""
+            "%s":%s""", key, bool);
+        //noinspection DataFlowIssue
         case Object obj -> {
           final var str = obj.toString();
           yield String.format("""
