@@ -42,20 +42,22 @@ record PagerDutyHttpEventClient(String defaultClientName,
 
   @Override
   public CompletableFuture<PagerDutyEventResponse> acknowledgeEvent(final String routingKey, final String dedupKey) {
-    return eventAction(routingKey, dedupKey, "\",\"event_action\":\"acknowledge\"}");
+    return eventAction(routingKey, dedupKey, "acknowledge");
   }
 
   @Override
   public CompletableFuture<PagerDutyEventResponse> resolveEvent(final String routingKey, final String dedupKey) {
-    return eventAction(routingKey, dedupKey, "\",\"event_action\":\"resolve\"}");
+    return eventAction(routingKey, dedupKey, "resolve");
   }
 
   private CompletableFuture<PagerDutyEventResponse> eventAction(final String routingKey,
                                                                 final String dedupKey,
-                                                                final String actionBody) {
+                                                                final String eventAction) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     Objects.requireNonNull(dedupKey, "De-duplication key is a required field.");
-    final var json = "{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + actionBody;
+    final var json = String.format("""
+            {"routing_key":"%s","dedup_key":"%s","event_action":"%s"}""",
+        routingKey, dedupKey, eventAction);
     return createAndSendRequest(routingKey, json);
   }
 
@@ -74,14 +76,11 @@ record PagerDutyHttpEventClient(String defaultClientName,
         ? ""
         : payload.getLinks().stream().map(PagerDutyLinkRef::toJson)
         .collect(Collectors.joining(",", ",\"links\":[", "]"));
-    final var json = "{\"event_action\":\"trigger\",\"payload\":" + payloadJson
-        + ",\"routing_key\":\"" + routingKey + '"'
-        + ",\"dedup_key\":\"" + payload.getDedupKey() + '"'
-        + ",\"client\":\"" + clientName + '"'
-        + (clientUrl == null ? "" : ",\"client_url\":\"" + clientUrl + '"')
-        + imagesJson
-        + linksJson
-        + '}';
+    final var json = String.format("""
+            {"event_action":"trigger","routing_key":"%s","dedup_key":"%s","payload":%s,"client":"%s"%s%s%s}""",
+        routingKey, payload.getDedupKey(), payloadJson, clientName,
+        (clientUrl == null ? "" : ",\"client_url\":\"" + clientUrl + '"'),
+        imagesJson, linksJson);
     return createAndSendRequest(routingKey, json);
   }
 

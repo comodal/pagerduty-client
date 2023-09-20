@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public final class EventClientTests implements EventClientTest {
 
   private final String dedupKey = UUID.randomUUID().toString();
+  private final String response = String.format("""
+      {"status":"success","message":"Event processed","dedup_key":"%s"}""", dedupKey);
 
   @Override
   public void createContext(final HttpServer httpServer,
@@ -36,22 +38,31 @@ public final class EventClientTests implements EventClientTest {
       assertEquals(routingKey, headers.getFirst("X-Routing-Key"));
 
       final var body = new String(httpExchange.getRequestBody().readAllBytes());
+
       if (body.startsWith("{\"event_action\":\"trigger")) {
-        assertEquals("{\"event_action\":\"trigger\",\"payload\":" +
-            "{\"summary\":\"test-summary\",\"source\":\"test-source\",\"severity\":\"critical\",\"timestamp\":\"2018-08-01T02:03:04Z\",\"component\":\"test-component\",\"group\":\"test-group\",\"class\":\"test-class\"," +
-            "\"custom_details\":{\"test-num-metric\":1,\"test-string-metric\":\"val\"}" +
-            "},\"routing_key\":\"" + routingKey +
-            "\",\"dedup_key\":\"" + dedupKey +
-            "\",\"client\":\"" + clientName +
-            "\",\"images\":[{\"src\":\"https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png\",\"href\":\"https://www.pagerduty.com/\",\"alt\":\"pagerduty\"}]" +
-            ",\"links\":[{\"href\":\"https://github.com/comodal/pagerduty-client\",\"text\":\"Github pagerduty-client\"}]}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+        final var expected = String.format("""
+                {
+                "event_action":"trigger",
+                "routing_key":"%s",
+                "dedup_key":"%s",
+                "payload":{"summary":"test-summary","source":"test-source","severity":"critical","timestamp":"2018-08-01T02:03:04Z","component":"test-component","group":"test-group","class":"test-class","custom_details":{"test-num-metric":1,"test-string-metric":"val"}},
+                "client":"%s",
+                "images":[{"src":"https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png","href":"https://www.pagerduty.com/","alt":"pagerduty"}],
+                "links":[{"href":"https://github.com/comodal/pagerduty-client","text":"Github pagerduty-client"}]
+                }""".replaceAll("\\n", ""),
+            routingKey, dedupKey, clientName);
+        assertEquals(expected, body);
+        writeResponse(httpExchange, response);
       } else if (body.endsWith("acknowledge\"}")) {
-        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + "\",\"event_action\":\"acknowledge\"}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+        final var expected = String.format("""
+            {"routing_key":"%s","dedup_key":"%s","event_action":"acknowledge"}""", routingKey, dedupKey);
+        assertEquals(expected, body);
+        writeResponse(httpExchange, response);
       } else if (body.endsWith("resolve\"}")) {
-        assertEquals("{\"routing_key\":\"" + routingKey + "\",\"dedup_key\":\"" + dedupKey + "\",\"event_action\":\"resolve\"}", body);
-        writeResponse(httpExchange, "{\"status\":\"success\",\"message\":\"Event processed\",\"dedup_key\":\"" + dedupKey + "\"}");
+        final var expected = String.format("""
+            {"routing_key":"%s","dedup_key":"%s","event_action":"resolve"}""", routingKey, dedupKey);
+        assertEquals(expected, body);
+        writeResponse(httpExchange, response);
       } else {
         fail("Invalid request body: " + body);
       }

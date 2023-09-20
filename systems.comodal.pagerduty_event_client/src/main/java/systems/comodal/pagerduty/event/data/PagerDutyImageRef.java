@@ -13,9 +13,8 @@ public interface PagerDutyImageRef {
   String getAlt();
 
   default String toJson() {
-    return "{\"src\":\"" + getSrc()
-        + "\",\"href\":\"" + getHref()
-        + "\",\"alt\":\"" + getAlt() + "\"}";
+    return String.format("""
+        {"src":"%s","href":"%s","alt":"%s"}""", getSrc(), getHref(), getAlt());
   }
 
   interface Builder extends PagerDutyImageRef {
