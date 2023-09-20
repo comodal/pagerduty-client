@@ -1,5 +1,7 @@
 package systems.comodal.pagerduty.event.data;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -290,13 +292,22 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
 
   private static String toJson(final Map<String, Object> object) {
     return object.entrySet().stream().map(entry -> {
+      final var key = entry.getKey();
       final var val = entry.getValue();
-      if (val instanceof Number || val instanceof Boolean) {
-        return '"' + entry.getKey() + "\":" + val;
-      } else {
-        final var str = val.toString();
-        return '"' + entry.getKey() + "\":\"" + (str.indexOf('"') < 0 ? str : escapeQuotes(str)) + '"';
-      }
+      return switch (val) {
+        case BigDecimal num -> String.format("""
+            "%s":"%s\"""", key, num.toPlainString());
+        case BigInteger num -> String.format("""
+            "%s":"%s\"""", key, num);
+        case Number num -> String.format("""
+            "%s":%s""", key, num);
+        case Object obj -> {
+          final var str = obj.toString();
+          yield String.format("""
+                  "%s":"%s\"""",
+              key, str.indexOf('"') < 0 ? str : escapeQuotes(str));
+        }
+      };
     }).collect(Collectors.joining(",", "{", "}"));
   }
 

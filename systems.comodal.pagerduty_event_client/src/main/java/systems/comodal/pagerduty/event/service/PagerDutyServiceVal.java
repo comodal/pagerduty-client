@@ -102,14 +102,12 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
       logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to resolve event with dedupe key '%s'.", dedupeKey));
       if (canBeRetried(throwable)) {
         return resolveEvent(dedupeKey, numFailures, retryDelayFn, timeUnit);
-      } else if (throwable instanceof RuntimeException) {
-        throw (RuntimeException) throwable;
-      } else if (throwable.getCause() instanceof RuntimeException) {
-        throw (RuntimeException) throwable.getCause();
-      } else if (throwable.getCause() == null) {
-        throw new RuntimeException(throwable);
+      } else if (throwable instanceof final RuntimeException runtimeException) {
+        throw runtimeException;
+      } else if (throwable.getCause() instanceof final RuntimeException runtimeException) {
+        throw runtimeException;
       } else {
-        throw new RuntimeException(throwable.getCause());
+        throw new RuntimeException(throwable.getCause() == null ? throwable : throwable.getCause());
       }
     };
     if (retryDelay > 0) {
@@ -120,13 +118,10 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
   }
 
   private static boolean canBeRetried(final Throwable throwable) {
-    if (throwable instanceof PagerDutyClientException) {
-      return ((PagerDutyClientException) throwable).canBeRetried();
-    } else if ((throwable.getCause() instanceof PagerDutyClientException)) {
-      return ((PagerDutyClientException) throwable.getCause()).canBeRetried();
-    } else {
-      return true;
-    }
+    return switch (throwable) {
+      case PagerDutyClientException ex -> ex.canBeRetried();
+      default -> !(throwable.getCause() instanceof final PagerDutyClientException ex) || ex.canBeRetried();
+    };
   }
 
   @Override
@@ -174,14 +169,12 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
       logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to trigger event:%n  %s", payload));
       if (canBeRetried(throwable)) {
         return triggerEvent(payload, numFailures, retryDelayFn, timeUnit);
-      } else if (throwable instanceof RuntimeException) {
-        throw (RuntimeException) throwable;
-      } else if (throwable.getCause() instanceof RuntimeException) {
-        throw (RuntimeException) throwable.getCause();
-      } else if (throwable.getCause() == null) {
-        throw new RuntimeException(throwable);
+      } else if (throwable instanceof final RuntimeException runtimeException) {
+        throw runtimeException;
+      } else if (throwable.getCause() instanceof final RuntimeException runtimeException) {
+        throw runtimeException;
       } else {
-        throw new RuntimeException(throwable.getCause());
+        throw new RuntimeException(throwable.getCause() == null ? throwable : throwable.getCause());
       }
     };
     if (retryDelay > 0) {
