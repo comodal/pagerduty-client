@@ -13,7 +13,7 @@ var client=PagerDutyEventClient.build()
     .authToken("AUTH_TOKEN")
     .create();
 
-    var payload=PagerDutyEventPayload.build()
+var payload=PagerDutyEventPayload.build()
     .summary("summary")
     .source("source")
     .severity(PagerDutySeverity.critical)
@@ -34,11 +34,39 @@ var client=PagerDutyEventClient.build()
     .create())
     .create();
 
-    var triggerResponse=client.triggerDefaultRouteEvent(payload).join();
-    System.out.println(triggerResponse);
+var triggerResponse=client.triggerDefaultRouteEvent(payload).join();
+System.out.println(triggerResponse);
 
-    var resolveResponse=client.resolveEvent(triggerResponse.getDedupeKey()).join();
-    System.out.println(resolveResponse);
+var resolveResponse=client.resolveEvent(triggerResponse.getDedupeKey()).join();
+System.out.println(resolveResponse);
+```
+
+## Hello Change Event
+
+```java
+var client = PagerDutyEventClient.build()
+    .defaultClientName("CLIENT_NAME")
+    .defaultRoutingKey("INTEGRATION_KEY")
+    .authToken("AUTH_TOKEN")
+    .create();
+
+var payload = PagerDutyChangeEventPayload.build()
+    .summary("test-summary")
+    .source("test-source")
+    .timestamp(ZonedDateTime.now(UTC))
+    .customDetails("test-num-metric", 1)
+    .customDetails("test-boolean", false)
+    .customDetails("test-string", "val")
+    .customDetails("test-json", "{\"test\": \"json\"}")
+    .link(PagerDutyLinkRef.build()
+        .href("https://github.com/comodal/pagerduty-client")
+        .text("Github pagerduty-client")
+        .create())
+    .create();
+
+
+var changeEventResponse = client.defaultRouteChangeEvent(payload).join();
+System.out.println(changeEventResponse);
 ```
 
 ## Library Layout
