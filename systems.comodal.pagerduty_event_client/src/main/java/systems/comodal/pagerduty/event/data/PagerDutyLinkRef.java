@@ -11,8 +11,14 @@ public interface PagerDutyLinkRef {
   String getText();
 
   default String toJson() {
-    return String.format("""
-        {"href":"%s","text":"%s"}""", getHref(), getText());
+    final var text = getText();
+    if (text == null || text.isBlank()) {
+      return String.format("""
+          {"href":"%s"}""", getHref());
+    } else {
+      return String.format("""
+          {"href":"%s","text":"%s"}""", getHref(), text);
+    }
   }
 
   interface Builder extends PagerDutyLinkRef {

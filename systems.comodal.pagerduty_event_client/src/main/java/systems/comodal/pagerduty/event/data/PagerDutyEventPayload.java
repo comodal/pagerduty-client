@@ -2,9 +2,8 @@ package systems.comodal.pagerduty.event.data;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 
-public interface PagerDutyEventPayload {
+public interface PagerDutyEventPayload extends PagerDutyChangeEventPayload {
 
   static PagerDutyEventPayload.Builder build() {
     return new PagerDutyEventPayloadBuilder();
@@ -16,13 +15,7 @@ public interface PagerDutyEventPayload {
 
   String getDedupKey();
 
-  String getSummary();
-
-  String getSource();
-
   PagerDutySeverity getSeverity();
-
-  ZonedDateTime getTimestamp();
 
   String getComponent();
 
@@ -30,44 +23,38 @@ public interface PagerDutyEventPayload {
 
   String getType();
 
-  Map<String, Object> getCustomDetails();
-
-  List<PagerDutyLinkRef> getLinks();
-
   List<PagerDutyImageRef> getImages();
 
-  String getPayloadJson();
-
-  interface Builder extends PagerDutyEventPayload {
+  interface Builder extends PagerDutyEventPayload, PagerDutyChangeEventPayload.Builder {
 
     PagerDutyEventPayload create();
 
-    Builder dedupKey(final String dedupKey);
+    PagerDutyEventPayload.Builder dedupKey(final String dedupKey);
 
-    Builder summary(final String summary);
+    PagerDutyEventPayload.Builder summary(final String summary);
 
-    Builder source(final String source);
+    PagerDutyEventPayload.Builder source(final String source);
 
-    Builder severity(final PagerDutySeverity severity);
+    PagerDutyEventPayload.Builder severity(final PagerDutySeverity severity);
 
-    Builder timestamp(final ZonedDateTime timestamp);
+    PagerDutyEventPayload.Builder timestamp(final ZonedDateTime timestamp);
 
-    Builder component(final String component);
+    PagerDutyEventPayload.Builder component(final String component);
 
-    Builder group(final String group);
+    PagerDutyEventPayload.Builder group(final String group);
 
-    Builder type(final String type);
+    PagerDutyEventPayload.Builder type(final String type);
 
-    Builder customDetails(final String field, final String fieldValue);
+    PagerDutyEventPayload.Builder customDetails(final String field, final String fieldValue);
 
-    Builder customDetails(final String field, final Boolean fieldValue);
+    PagerDutyEventPayload.Builder customDetails(final String field, final Boolean fieldValue);
 
-    Builder customDetails(final String field, final Number fieldValue);
+    PagerDutyEventPayload.Builder customDetails(final String field, final Number fieldValue);
 
-    Builder customDetails(final String field, final Object fieldValue);
+    PagerDutyEventPayload.Builder customDetails(final String field, final Object fieldValue);
 
-    Builder link(final PagerDutyLinkRef link);
+    PagerDutyEventPayload.Builder link(final PagerDutyLinkRef link);
 
-    Builder image(final PagerDutyImageRef image);
+    PagerDutyEventPayload.Builder image(final PagerDutyImageRef image);
   }
 }

@@ -1,5 +1,6 @@
 package systems.comodal.pagerduty.event.client;
 
+import systems.comodal.pagerduty.event.data.PagerDutyChangeEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
@@ -43,6 +44,11 @@ public interface PagerDutyEventClient {
                                                          final String clientUrl,
                                                          final String routingKey,
                                                          final PagerDutyEventPayload payload);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final String clientName,
+                                                        final String clientUrl,
+                                                        final String routingKey,
+                                                        final PagerDutyChangeEventPayload payload);
 
   interface Builder {
 

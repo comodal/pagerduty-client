@@ -22,15 +22,16 @@ final class PagerDutyEventClientBuilder implements PagerDutyEventClient.Builder 
 
   PagerDutyEventClientBuilder() {
   }
-  
+
   @Override
   public PagerDutyEventClient create() {
     final var authHeader = "Token token=" + requireNonNull(authToken, "Auth token is required.");
-    final var pageDutyEventsUri = URI.create(pagerDutyUri).resolve("/v2/enqueue");
+    final var eventUri = URI.create(pagerDutyUri).resolve("/v2/enqueue");
+    final var changeEventsUri = URI.create(pagerDutyUri).resolve("/v2/change/enqueue");
     return new PagerDutyHttpEventClient(defaultClientName, defaultClientUrl,
         defaultRoutingKey,
         authHeader,
-        pageDutyEventsUri,
+        eventUri, changeEventsUri,
         httpClient == null ? HttpClient.newBuilder().version(HTTP_2).build() : httpClient,
         responseAdapter == null
             ? ServiceLoader.load(PagerDutyEventAdapterFactory.class).findFirst().orElseThrow().create()

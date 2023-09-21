@@ -1,58 +1,35 @@
 package systems.comodal.pagerduty.event.data;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 
-final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builder {
+final class PagerDutyEventPayloadBuilder
+    extends PagerDutyChangeEventPayloadRecord.PagerDutyChangeEventPayloadBuilder
+    implements PagerDutyEventPayload.Builder {
 
-  private static final Map<String, Object> NO_CUSTOM_DETAILS = Map.of();
-  private static final List<PagerDutyLinkRef> NO_LINKS = List.of();
   private static final List<PagerDutyImageRef> NO_IMAGES = List.of();
 
   private String dedupKey;
-  private String summary;
-  private String source;
   private PagerDutySeverity severity;
-  private ZonedDateTime timestamp;
   private String component;
   private String group;
   private String type;
-  private Map<String, Object> customDetails;
-  private List<PagerDutyLinkRef> links;
   private List<PagerDutyImageRef> images;
 
   PagerDutyEventPayloadBuilder() {
-    this.customDetails = NO_CUSTOM_DETAILS;
-    this.links = NO_LINKS;
+    super();
     this.images = NO_IMAGES;
   }
 
   PagerDutyEventPayloadBuilder(final PagerDutyEventPayload prototype) {
+    super(prototype);
     this.dedupKey(prototype.getDedupKey());
-    this.summary(prototype.getSummary());
-    this.source(prototype.getSource());
     this.severity(prototype.getSeverity());
-    this.timestamp(prototype.getTimestamp());
     this.component(prototype.getComponent());
     this.group(prototype.getGroup());
     this.type(prototype.getType());
-    final var customDetails = prototype.getCustomDetails();
-    this.customDetails = customDetails == null || customDetails.isEmpty()
-        ? NO_CUSTOM_DETAILS
-        : customDetails.size() > 1
-        ? new LinkedHashMap<>(customDetails)
-        : Map.copyOf(customDetails);
-    final var links = prototype.getLinks();
-    this.links = links == null || links.isEmpty()
-        ? NO_LINKS
-        : links.size() > 1
-        ? new ArrayList<>(links)
-        : List.copyOf(links);
     final var images = prototype.getImages();
     this.images = images == null || images.isEmpty()
         ? NO_IMAGES
@@ -87,7 +64,7 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
-  public Builder dedupKey(final String dedupKey) {
+  public PagerDutyEventPayload.Builder dedupKey(final String dedupKey) {
     if (dedupKey != null && dedupKey.length() > 255) {
       throw new IllegalArgumentException("Max length for 'dedup_key' is 255");
     }
@@ -96,93 +73,79 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
-  public Builder summary(final String summary) {
-    this.summary = summary.length() > 1_024 ? summary.substring(0, 1_024) : summary;
+  public PagerDutyEventPayload.Builder summary(final String summary) {
+    super.summary(summary);
     return this;
   }
 
   @Override
-  public Builder source(final String source) {
-    this.source = source;
+  public PagerDutyEventPayload.Builder source(final String source) {
+    super.source(source);
     return this;
   }
 
   @Override
-  public Builder severity(final PagerDutySeverity severity) {
+  public PagerDutyEventPayload.Builder severity(final PagerDutySeverity severity) {
     this.severity = severity;
     return this;
   }
 
   @Override
-  public Builder timestamp(final ZonedDateTime timestamp) {
-    this.timestamp = timestamp;
+  public PagerDutyEventPayload.Builder timestamp(final ZonedDateTime timestamp) {
+    super.timestamp(timestamp);
     return this;
   }
 
   @Override
-  public Builder component(final String component) {
+  public PagerDutyEventPayload.Builder component(final String component) {
     this.component = component;
     return this;
   }
 
   @Override
-  public Builder group(final String group) {
+  public PagerDutyEventPayload.Builder group(final String group) {
     this.group = group;
     return this;
   }
 
   @Override
-  public Builder type(final String type) {
+  public PagerDutyEventPayload.Builder type(final String type) {
     this.type = type;
     return this;
   }
 
-  private Builder customDetailsObject(final String field, final Object fieldValue) {
-    final var val = fieldValue == null ? "null" : fieldValue;
-    if (customDetails == null || customDetails.isEmpty()) {
-      customDetails = Map.of(field, val);
-      return this;
-    } else if (customDetails.size() == 1) {
-      customDetails = new LinkedHashMap<>(customDetails);
-    }
-    customDetails.put(field, val);
+  @Override
+  public PagerDutyEventPayload.Builder customDetails(final String field, final String fieldValue) {
+    super.customDetailsObject(field, fieldValue);
     return this;
   }
 
   @Override
-  public Builder customDetails(final String field, final String fieldValue) {
-    return customDetailsObject(field, fieldValue);
-  }
-
-  @Override
-  public Builder customDetails(final String field, final Boolean fieldValue) {
-    return customDetailsObject(field, fieldValue);
-  }
-
-  @Override
-  public Builder customDetails(final String field, final Number fieldValue) {
-    return customDetailsObject(field, fieldValue);
-  }
-
-  @Override
-  public Builder customDetails(final String field, final Object fieldValue) {
-    return customDetailsObject(field, fieldValue == null ? null : fieldValue.toString());
-  }
-
-  @Override
-  public Builder link(final PagerDutyLinkRef link) {
-    if (links.isEmpty()) {
-      links = List.of(link);
-      return this;
-    } else if (links.size() == 1) {
-      links = new ArrayList<>(links);
-    }
-    links.add(link);
+  public PagerDutyEventPayload.Builder customDetails(final String field, final Boolean fieldValue) {
+    super.customDetailsObject(field, fieldValue);
     return this;
   }
 
   @Override
-  public Builder image(final PagerDutyImageRef image) {
+  public PagerDutyEventPayload.Builder customDetails(final String field, final Number fieldValue) {
+    super.customDetailsObject(field, fieldValue);
+    return this;
+  }
+
+  @Override
+  public PagerDutyEventPayload.Builder customDetails(final String field, final Object fieldValue) {
+    super.customDetailsObject(field, fieldValue);
+    return this;
+  }
+
+  @Override
+  public PagerDutyEventPayload.Builder link(final PagerDutyLinkRef link) {
+    super.link(link);
+    return this;
+  }
+
+  @Override
+  public PagerDutyEventPayload.Builder image(final PagerDutyImageRef image) {
     if (images.isEmpty()) {
       images = List.of(image);
       return this;
@@ -199,23 +162,8 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
-  public String getSummary() {
-    return summary;
-  }
-
-  @Override
-  public String getSource() {
-    return source;
-  }
-
-  @Override
   public PagerDutySeverity getSeverity() {
     return severity;
-  }
-
-  @Override
-  public ZonedDateTime getTimestamp() {
-    return timestamp;
   }
 
   @Override
@@ -234,87 +182,10 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
   }
 
   @Override
-  public Map<String, Object> getCustomDetails() {
-    return customDetails;
-  }
-
-  @Override
-  public List<PagerDutyLinkRef> getLinks() {
-    return links;
-  }
-
-  @Override
   public List<PagerDutyImageRef> getImages() {
     return images;
   }
 
-  private static void appendString(final StringBuilder jsonBuilder, final String field, final String str) {
-    if (str != null && !str.isBlank()) {
-      jsonBuilder.append(",\"");
-      jsonBuilder.append(field);
-      jsonBuilder.append("\":\"");
-      jsonBuilder.append(str);
-      jsonBuilder.append('"');
-    }
-  }
-
-  private static String escapeQuotes(final String str) {
-    final char[] chars = str.toCharArray();
-    final char[] escaped = new char[chars.length << 1];
-    char c;
-    for (int escapes = 0, from = 0, dest = 0, to = 0; ; to++) {
-      if (to == chars.length) {
-        if (from == 0) {
-          return str;
-        } else {
-          final int len = to - from;
-          System.arraycopy(chars, from, escaped, dest, len);
-          dest += len;
-          return new String(escaped, 0, dest);
-        }
-      } else {
-        c = chars[to];
-        if (c == '\\') {
-          escapes++;
-        } else if (c == '"' && (escapes & 1) == 0) {
-          final int len = to - from;
-          System.arraycopy(chars, from, escaped, dest, len);
-          dest += len;
-          escaped[dest++] = '\\';
-          from = to;
-          escapes = 0;
-        } else {
-          escapes = 0;
-        }
-      }
-    }
-  }
-
-  private static String toJson(final Map<String, Object> object) {
-    return object.entrySet().stream().map(entry -> {
-      final var key = entry.getKey();
-      final var val = entry.getValue();
-      return switch (val) {
-        case null -> String.format("""
-            "%s":null""", key);
-        case BigDecimal bigDecimal -> String.format("""
-            "%s":"%s\"""", key, bigDecimal.toPlainString());
-        case BigInteger bigInteger -> String.format("""
-            "%s":"%s\"""", key, bigInteger);
-        case Number number -> String.format("""
-            "%s":%s""", key, number);
-        case Boolean bool -> String.format("""
-            "%s":%s""", key, bool);
-        //noinspection DataFlowIssue
-        case Object obj -> {
-          final var str = obj.toString();
-          yield String.format("""
-                  "%s":"%s\"""",
-              key, str.indexOf('"') < 0 ? str : escapeQuotes(str));
-        }
-      };
-    }).collect(Collectors.joining(",", "{", "}"));
-  }
 
   @Override
   public String getPayloadJson() {
@@ -331,10 +202,5 @@ final class PagerDutyEventPayloadBuilder implements PagerDutyEventPayload.Builde
       jsonBuilder.append(toJson(customDetails));
     }
     return jsonBuilder.append('}').toString();
-  }
-
-  @Override
-  public String toString() {
-    return getPayloadJson();
   }
 }

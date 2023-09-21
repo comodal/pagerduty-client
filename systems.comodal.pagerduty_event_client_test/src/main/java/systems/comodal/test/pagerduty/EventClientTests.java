@@ -32,10 +32,10 @@ public final class EventClientTests implements EventClientTest {
       assertNull(httpExchange.getRequestURI().getQuery());
 
       final var headers = httpExchange.getRequestHeaders();
-      assertEquals("application/json", headers.getFirst("Content-Type"));
       assertEquals("Token token=" + authToken, headers.getFirst("Authorization"));
-      assertEquals("application/vnd.pagerduty+json;version=2", headers.getFirst("Accept"));
-      assertEquals(routingKey, headers.getFirst("X-Routing-Key"));
+      assertEquals("application/json", headers.getFirst("Content-Type"));
+      assertEquals("application/json", headers.getFirst("Accept"));
+      assertNull(headers.getFirst("X-Routing-Key"));
 
       final var body = new String(httpExchange.getRequestBody().readAllBytes());
 

@@ -1,9 +1,9 @@
 package systems.comodal.pagerduty.event.client;
 
+import systems.comodal.pagerduty.event.data.PagerDutyChangeEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 import systems.comodal.pagerduty.event.data.PagerDutyImageRef;
-import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
 import systems.comodal.pagerduty.event.data.adapters.PagerDutyEventAdapter;
 
 import java.net.URI;
@@ -22,6 +22,7 @@ record PagerDutyHttpEventClient(String defaultClientName,
                                 String defaultRoutingKey,
                                 String authorizationHeader,
                                 URI eventUri,
+                                URI changeEventUri,
                                 HttpClient httpClient,
                                 PagerDutyEventAdapter adapter) implements PagerDutyEventClient {
 
@@ -38,6 +39,19 @@ record PagerDutyHttpEventClient(String defaultClientName,
   @Override
   public String getDefaultRoutingKey() {
     return defaultRoutingKey;
+  }
+
+  private HttpRequest createRequest(final URI endpoint, final String jsonBody) {
+    return HttpRequest.newBuilder(endpoint).headers(
+            "Authorization", authorizationHeader,
+            "Accept", "application/json",
+            "Content-Type", "application/json")
+        .POST(ofString(jsonBody, UTF_8)).build();
+  }
+
+  private CompletableFuture<PagerDutyEventResponse> createAndSendEventRequest(final URI uri, final String jsonBody) {
+    return httpClient.sendAsync(createRequest(uri, jsonBody), ofByteArray())
+        .thenApplyAsync(adapter::adaptResponse);
   }
 
   @Override
@@ -58,7 +72,7 @@ record PagerDutyHttpEventClient(String defaultClientName,
     final var json = String.format("""
             {"routing_key":"%s","dedup_key":"%s","event_action":"%s"}""",
         routingKey, dedupKey, eventAction);
-    return createAndSendRequest(routingKey, json);
+    return createAndSendEventRequest(eventUri, json);
   }
 
   @Override
@@ -68,35 +82,31 @@ record PagerDutyHttpEventClient(String defaultClientName,
                                                                 final PagerDutyEventPayload payload) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     final var payloadJson = payload.getPayloadJson();
+    final var linksJson = payload.getLinksJson();
     final var imagesJson = payload.getImages().isEmpty()
         ? ""
         : payload.getImages().stream().map(PagerDutyImageRef::toJson)
         .collect(Collectors.joining(",", ",\"images\":[", "]"));
-    final var linksJson = payload.getLinks().isEmpty()
-        ? ""
-        : payload.getLinks().stream().map(PagerDutyLinkRef::toJson)
-        .collect(Collectors.joining(",", ",\"links\":[", "]"));
     final var json = String.format("""
             {"event_action":"trigger","routing_key":"%s","dedup_key":"%s","payload":%s,"client":"%s"%s%s%s}""",
         routingKey, payload.getDedupKey(), payloadJson, clientName,
         (clientUrl == null ? "" : ",\"client_url\":\"" + clientUrl + '"'),
         imagesJson, linksJson);
-    return createAndSendRequest(routingKey, json);
+    return createAndSendEventRequest(eventUri, json);
   }
 
-  private HttpRequest createRequest(final String routingKey, final String jsonBody) {
-    return HttpRequest.newBuilder(eventUri)
-        .headers(
-            "Authorization", authorizationHeader,
-            "Accept", "application/vnd.pagerduty+json;version=2",
-            "Content-Type", "application/json",
-            "X-Routing-Key", routingKey)
-        .POST(ofString(jsonBody, UTF_8)).build();
-  }
-
-  private CompletableFuture<PagerDutyEventResponse> createAndSendRequest(final String routingKey, final String jsonBody) {
-    return httpClient.sendAsync(createRequest(routingKey, jsonBody), ofByteArray())
-        .thenApplyAsync(adapter::adaptResponse);
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final String clientName,
+                                                               final String clientUrl,
+                                                               final String routingKey,
+                                                               final PagerDutyChangeEventPayload payload) {
+    Objects.requireNonNull(routingKey, "Routing key is a required field.");
+    final var payloadJson = payload.getPayloadJson();
+    final var linksJson = payload.getLinksJson();
+    final var json = String.format("""
+            {"routing_key":"%s","payload":%s%s}""",
+        routingKey, payloadJson, linksJson);
+    return createAndSendEventRequest(changeEventUri, json);
   }
 
   @Override
@@ -104,6 +114,7 @@ record PagerDutyHttpEventClient(String defaultClientName,
     return "PagerDutyHttpEventClient{defaultClientName='" + defaultClientName + '\'' +
         ", defaultClientUrl='" + defaultClientUrl + '\'' +
         ", defaultRoutingKey='" + defaultRoutingKey + '\'' +
-        ", eventUri=" + eventUri + '}';
+        ", eventUri=" + eventUri + '\'' +
+        ", changeEventUri=" + changeEventUri + '}';
   }
 }
