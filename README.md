@@ -1,4 +1,4 @@
-# PagerDuty Event Client
+# PagerDuty Event Client  [![Gradle Check](https://github.com/comodal/pagerduty-client/actions/workflows/gradle-check.yml/badge.svg)](https://github.com/comodal/pagerduty-client/actions/workflows/gradle-check.yml)
 
 This client aims to be compliant with the latest version of
 the [PagerDuty Event API](https://v2.developer.pagerduty.com/docs/events-api-v2), currently V2. It also only aims to be
