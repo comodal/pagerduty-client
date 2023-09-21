@@ -1,13 +1,13 @@
 package systems.comodal.test.pagerduty;
 
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
-import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
-import systems.comodal.pagerduty.event.data.PagerDutyImageRef;
-import systems.comodal.pagerduty.event.data.PagerDutyLinkRef;
-import systems.comodal.pagerduty.event.data.PagerDutySeverity;
+import systems.comodal.pagerduty.event.data.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 
+import static java.math.BigDecimal.TEN;
 import static java.time.ZoneOffset.UTC;
 
 public final class Integ {
@@ -34,6 +34,8 @@ public final class Integ {
         .customDetails("test-boolean", false)
         .customDetails("test-string", "val")
         .customDetails("test-json", "{\"test\": \"json\"}")
+        .customDetails("test-big-decimal", BigDecimal.valueOf(Double.MAX_VALUE).multiply(TEN))
+        .customDetails("test-big-integer", BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.TEN))
         .link(PagerDutyLinkRef.build()
             .href("https://github.com/comodal/pagerduty-client")
             .text("Github pagerduty-client")
@@ -45,7 +47,12 @@ public final class Integ {
             .create())
         .create();
 
-    final var triggerResponse = client.triggerDefaultRouteEvent(payload).join();
+    final var triggerResponseFuture = client.triggerDefaultRouteEvent(payload);
+
+    final var changeEventPayload = PagerDutyChangeEventPayload.build(payload).create();
+    final var changeEventResponseFuture = client.defaultRouteChangeEvent(changeEventPayload);
+
+    final var triggerResponse = triggerResponseFuture.join();
     System.out.println(triggerResponse);
 
     final var ackResponse = client.acknowledgeEvent(triggerResponse.getDedupKey()).join();
@@ -53,5 +60,8 @@ public final class Integ {
 
     final var resolveResponse = client.resolveEvent(triggerResponse.getDedupKey()).join();
     System.out.println(resolveResponse);
+
+    final var changeEventResponse = changeEventResponseFuture.join();
+    System.out.println(changeEventResponse);
   }
 }

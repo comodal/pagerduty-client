@@ -1,5 +1,6 @@
 package systems.comodal.test.pagerduty;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
@@ -18,6 +19,17 @@ public final class EventClientTests implements EventClientTest {
   private final String response = String.format("""
       {"status":"success","message":"Event processed","dedup_key":"%s"}""", dedupKey);
 
+  private void validateRequest(final HttpExchange httpExchange, final String expectedAuthToken) {
+    assertEquals("POST", httpExchange.getRequestMethod());
+    assertNull(httpExchange.getRequestURI().getQuery());
+
+    final var headers = httpExchange.getRequestHeaders();
+    assertEquals("Token token=" + expectedAuthToken, headers.getFirst("Authorization"));
+    assertEquals("application/json", headers.getFirst("Content-Type"));
+    assertEquals("application/json", headers.getFirst("Accept"));
+    assertNull(headers.getFirst("X-Routing-Key"));
+  }
+
   @Override
   public void createContext(final HttpServer httpServer,
                             final BiConsumer<String, HttpHandler> server) {
@@ -27,15 +39,7 @@ public final class EventClientTests implements EventClientTest {
     final var routingKey = "routing-key-" + port;
 
     server.accept("/v2/enqueue", httpExchange -> {
-      assertEquals("POST", httpExchange.getRequestMethod());
-
-      assertNull(httpExchange.getRequestURI().getQuery());
-
-      final var headers = httpExchange.getRequestHeaders();
-      assertEquals("Token token=" + authToken, headers.getFirst("Authorization"));
-      assertEquals("application/json", headers.getFirst("Content-Type"));
-      assertEquals("application/json", headers.getFirst("Accept"));
-      assertNull(headers.getFirst("X-Routing-Key"));
+      validateRequest(httpExchange, authToken);
 
       final var body = new String(httpExchange.getRequestBody().readAllBytes());
 
@@ -66,6 +70,22 @@ public final class EventClientTests implements EventClientTest {
       } else {
         fail("Invalid request body: " + body);
       }
+    });
+
+    server.accept("/v2/change/enqueue", httpExchange -> {
+      validateRequest(httpExchange, authToken);
+
+      final var body = new String(httpExchange.getRequestBody().readAllBytes());
+      final var expected = String.format("""
+              {
+              "routing_key":"%s",
+              "payload":{"summary":"test-summary","source":"test-source","timestamp":"2018-08-01T02:03:04Z","custom_details":{"test-num-metric":1,"test-string-metric":"val"}},
+              "links":[{"href":"https://github.com/comodal/pagerduty-client","text":"Github pagerduty-client"}]
+              }""".replaceAll("\\n", ""),
+          routingKey, dedupKey, clientName);
+      assertEquals(expected, body);
+      writeResponse(httpExchange, """
+          {"status":"success","message":"Event processed"}""");
     });
   }
 
@@ -101,11 +121,20 @@ public final class EventClientTests implements EventClientTest {
 
     final var resolveResponse = client.resolveEvent(response.getDedupKey()).join();
     validateResponse(resolveResponse);
+
+    final var changeEventPayload = PagerDutyChangeEventPayload.build(payload).create();
+    final var changeEventResponse = client.defaultRouteChangeEvent(changeEventPayload).join();
+    validateResponseStatusAndMessage(changeEventResponse);
+    assertNull(changeEventResponse.getDedupKey());
+  }
+
+  private void validateResponseStatusAndMessage(final PagerDutyEventResponse response) {
+    assertEquals("success", response.getStatus());
+    assertEquals("Event processed", response.getMessage());
   }
 
   private void validateResponse(final PagerDutyEventResponse response) {
-    assertEquals("success", response.getStatus());
-    assertEquals("Event processed", response.getMessage());
+    validateResponseStatusAndMessage(response);
     assertEquals(dedupKey, response.getDedupKey());
   }
 }

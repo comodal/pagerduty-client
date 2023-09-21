@@ -96,9 +96,7 @@ record PagerDutyHttpEventClient(String defaultClientName,
   }
 
   @Override
-  public CompletableFuture<PagerDutyEventResponse> changeEvent(final String clientName,
-                                                               final String clientUrl,
-                                                               final String routingKey,
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final String routingKey,
                                                                final PagerDutyChangeEventPayload payload) {
     Objects.requireNonNull(routingKey, "Routing key is a required field.");
     final var payloadJson = payload.getPayloadJson();

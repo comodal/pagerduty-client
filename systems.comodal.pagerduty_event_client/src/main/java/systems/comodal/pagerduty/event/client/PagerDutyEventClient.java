@@ -45,9 +45,11 @@ public interface PagerDutyEventClient {
                                                          final String routingKey,
                                                          final PagerDutyEventPayload payload);
 
-  CompletableFuture<PagerDutyEventResponse> changeEvent(final String clientName,
-                                                        final String clientUrl,
-                                                        final String routingKey,
+  default CompletableFuture<PagerDutyEventResponse> defaultRouteChangeEvent(final PagerDutyChangeEventPayload payload) {
+    return changeEvent(getDefaultRoutingKey(), payload);
+  }
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final String routingKey,
                                                         final PagerDutyChangeEventPayload payload);
 
   interface Builder {
