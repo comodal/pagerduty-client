@@ -13,31 +13,37 @@ var client=PagerDutyEventClient.build()
     .authToken("AUTH_TOKEN")
     .create();
 
-var payload=PagerDutyEventPayload.build()
-    .summary("summary")
-    .source("source")
+var bigInteger = new BigInteger("20988936657440586486151264256610222593863921");
+var payload = PagerDutyEventPayload.build()
+    .summary("test-summary")
+    .source("test-source")
     .severity(PagerDutySeverity.critical)
     .timestamp(ZonedDateTime.now(UTC))
-    .component("component")
-    .group("group")
-    .type("class")
-    .customDetails("num-metric",1)
-    .customDetails("string-metric","val")
+    .component("test-component")
+    .group("test-group")
+    .type("test-class")
+    .customDetails("test-num-metric", 1)
+    .customDetails("test-boolean", true)
+    .customDetails("test-string", "val")
+    .customDetails("test-nested-json", """
+        {"test": "json"}""")
+    .customDetails("test-big-decimal", new BigDecimal(bigInteger).add(BigDecimal.valueOf(0.123456789)))
+    .customDetails("test-big-integer", bigInteger)
     .link(PagerDutyLinkRef.build()
-    .href("https://github.com/comodal/pagerduty-client")
-    .text("Github pagerduty-client")
-    .create())
+        .href("https://github.com/comodal/pagerduty-client")
+        .text("Github pagerduty-client")
+        .create())
     .image(PagerDutyImageRef.build()
-    .src("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png")
-    .href("https://www.pagerduty.com/")
-    .alt("pagerduty")
-    .create())
+        .src("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png")
+        .href("https://www.pagerduty.com/")
+        .alt("pagerduty")
+        .create())
     .create();
 
-var triggerResponse=client.triggerDefaultRouteEvent(payload).join();
+var triggerResponse = client.triggerDefaultRouteEvent(payload).join();
 System.out.println(triggerResponse);
 
-var resolveResponse=client.resolveEvent(triggerResponse.getDedupeKey()).join();
+var resolveResponse = client.resolveEvent(triggerResponse.getDedupeKey()).join();
 System.out.println(resolveResponse);
 ```
 
@@ -50,14 +56,18 @@ var client = PagerDutyEventClient.build()
     .authToken("AUTH_TOKEN")
     .create();
 
+var bigInteger = new BigInteger("20988936657440586486151264256610222593863921");
 var payload = PagerDutyChangeEventPayload.build()
     .summary("test-summary")
     .source("test-source")
     .timestamp(ZonedDateTime.now(UTC))
     .customDetails("test-num-metric", 1)
-    .customDetails("test-boolean", false)
+    .customDetails("test-boolean", true)
     .customDetails("test-string", "val")
-    .customDetails("test-json", "{\"test\": \"json\"}")
+    .customDetails("test-nested-json", """
+        {"test": "json"}""")
+    .customDetails("test-big-decimal", new BigDecimal(bigInteger).add(BigDecimal.valueOf(0.123456789)))
+    .customDetails("test-big-integer", bigInteger)
     .link(PagerDutyLinkRef.build()
         .href("https://github.com/comodal/pagerduty-client")
         .text("Github pagerduty-client")

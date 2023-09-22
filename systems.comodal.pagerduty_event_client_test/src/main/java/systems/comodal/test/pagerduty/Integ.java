@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 
-import static java.math.BigDecimal.TEN;
 import static java.time.ZoneOffset.UTC;
 
 public final class Integ {
@@ -22,7 +21,8 @@ public final class Integ {
         .authToken("AUTH_TOKEN")
         .create();
 
-    var payload = PagerDutyEventPayload.build()
+    final var bigInteger = new BigInteger("20988936657440586486151264256610222593863921");
+    final var payload = PagerDutyEventPayload.build()
         .summary("test-summary")
         .source("test-source")
         .severity(PagerDutySeverity.critical)
@@ -31,11 +31,12 @@ public final class Integ {
         .group("test-group")
         .type("test-class")
         .customDetails("test-num-metric", 1)
-        .customDetails("test-boolean", false)
+        .customDetails("test-boolean", true)
         .customDetails("test-string", "val")
-        .customDetails("test-json", "{\"test\": \"json\"}")
-        .customDetails("test-big-decimal", BigDecimal.valueOf(Double.MAX_VALUE).multiply(TEN))
-        .customDetails("test-big-integer", BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.TEN))
+        .customDetails("test-nested-json", """
+            {"test": "json"}""")
+        .customDetails("test-big-decimal", new BigDecimal(bigInteger).add(BigDecimal.valueOf(0.123456789)))
+        .customDetails("test-big-integer", bigInteger)
         .link(PagerDutyLinkRef.build()
             .href("https://github.com/comodal/pagerduty-client")
             .text("Github pagerduty-client")
