@@ -231,26 +231,26 @@ record PagerDutyChangeEventPayloadRecord(String summary,
 
     static String toJson(final Map<String, Object> object) {
       return object.entrySet().stream().map(entry -> {
-        final var key = entry.getKey();
         final var val = entry.getValue();
-        return switch (val) {
-          case null -> String.format("""
-              "%s":null""", key);
-          case BigDecimal bigDecimal -> String.format("""
-              "%s":"%s\"""", key, bigDecimal.toPlainString());
-          case BigInteger bigInteger -> String.format("""
-              "%s":"%s\"""", key, bigInteger);
-          case Number number -> String.format("""
-              "%s":%s""", key, number);
-          case Boolean bool -> String.format("""
-              "%s":%s""", key, bool);
-          //noinspection DataFlowIssue
+        final var stringOrRawVal = switch (val) {
+          case null -> null;
+          case BigDecimal bigDecimal -> bigDecimal.toPlainString();
+          case BigInteger bigInteger -> bigInteger.toString();
+          case Number number -> number;
+          case Boolean bool -> bool;
           case Object obj -> {
             final var str = obj.toString();
-            yield String.format("""
-                    "%s":"%s\"""",
-                key, str.indexOf('"') < 0 ? str : escapeQuotes(str));
+            yield str.indexOf('"') < 0 ? str : escapeQuotes(str);
           }
+        };
+        final var key = entry.getKey();
+        return switch (stringOrRawVal) {
+          case null -> String.format("""
+              "%s":null""", key);
+          case String string -> String.format("""
+              "%s":"%s\"""", key, string);
+          case Object obj -> String.format("""
+              "%s":%s""", key, obj);
         };
       }).collect(Collectors.joining(",", "{", "}"));
     }
