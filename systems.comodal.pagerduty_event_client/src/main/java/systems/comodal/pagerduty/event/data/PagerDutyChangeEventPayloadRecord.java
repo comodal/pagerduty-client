@@ -102,7 +102,9 @@ record PagerDutyChangeEventPayloadRecord(String summary,
 
     @Override
     public Builder summary(final String summary) {
-      this.summary = summary.length() > 1_024 ? summary.substring(0, 1_024) : summary;
+      if (summary != null && !summary.isBlank()) {
+        this.summary = summary.length() > 1_024 ? summary.substring(0, 1_024) : summary;
+      }
       return this;
     }
 
