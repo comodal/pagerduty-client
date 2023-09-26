@@ -24,7 +24,7 @@ buildscript {
     VERSION = getAppVersion()
     VCS_URL = 'https://github.com/comodal/pagerduty-client'
     // Used by systems.comodal.pagerduty_event_json_iterator_adapter
-    jsoniter = "2.9.+" // https://github.com/comodal/json-iterator/releases
+    jsoniter = "2.10.+" // https://github.com/comodal/json-iterator/releases
   }
 }
 

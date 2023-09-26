@@ -1,6 +1,7 @@
 package systems.comodal.pagerduty.event.service;
 
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
+import systems.comodal.pagerduty.event.data.PagerDutyChangeEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 
@@ -101,6 +102,32 @@ public interface PagerDutyService {
   CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload,
                                                          final LongUnaryOperator retryDelayFn,
                                                          final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                        final long stepDelay,
+                                                        final long maxDelay,
+                                                        final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                        final Duration giveUpAfter,
+                                                        final long stepDelay,
+                                                        final long maxDelay,
+                                                        final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                        final int maxRetries,
+                                                        final long stepDelay,
+                                                        final long maxDelay,
+                                                        final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                        final LongUnaryOperator retryDelayFn,
+                                                        final TimeUnit timeUnit);
+
+  CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                        final int retry,
+                                                        final LongUnaryOperator retryDelayFn,
+                                                        final TimeUnit timeUnit);
 
   interface Builder {
 

@@ -1,6 +1,7 @@
 package systems.comodal.pagerduty.event.service;
 
 import systems.comodal.pagerduty.event.client.PagerDutyEventClient;
+import systems.comodal.pagerduty.event.data.PagerDutyChangeEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventPayload;
 import systems.comodal.pagerduty.event.data.PagerDutyEventResponse;
 import systems.comodal.pagerduty.exceptions.PagerDutyClientException;
@@ -124,8 +125,21 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
     };
   }
 
+  private static RuntimeException throwRuntimeException(final Throwable throwable) {
+    if (throwable instanceof final RuntimeException runtimeException) {
+      throw runtimeException;
+    } else if (throwable.getCause() instanceof final RuntimeException runtimeException) {
+      throw runtimeException;
+    } else {
+      throw new RuntimeException(throwable.getCause() == null ? throwable : throwable.getCause());
+    }
+  }
+
   @Override
-  public CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload, final long stepDelay, final long maxDelay, final TimeUnit timeUnit) {
+  public CompletableFuture<PagerDutyEventResponse> triggerEvent(final PagerDutyEventPayload payload,
+                                                                final long stepDelay,
+                                                                final long maxDelay,
+                                                                final TimeUnit timeUnit) {
     return triggerEvent(payload, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
   }
 
@@ -175,6 +189,66 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
         throw runtimeException;
       } else {
         throw new RuntimeException(throwable.getCause() == null ? throwable : throwable.getCause());
+      }
+    };
+    if (retryDelay > 0) {
+      return responseFuture.exceptionallyComposeAsync(exceptionally, delayedExecutor(retryDelay, timeUnit));
+    } else {
+      return responseFuture.exceptionallyCompose(exceptionally);
+    }
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                               final long stepDelay,
+                                                               final long maxDelay,
+                                                               final TimeUnit timeUnit) {
+    return changeEvent(payload, 0, PagerDutyService.createRetryDelayFn(stepDelay, maxDelay), timeUnit);
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                               final Duration giveUpAfter,
+                                                               final long stepDelay,
+                                                               final long maxDelay,
+                                                               final TimeUnit timeUnit) {
+    final int maxRetries = (int) Math.min(Integer.MAX_VALUE, giveUpAfter.toMillis() / timeUnit.toMillis(stepDelay));
+    return changeEvent(payload, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                               final int maxRetries,
+                                                               final long stepDelay,
+                                                               final long maxDelay,
+                                                               final TimeUnit timeUnit) {
+    return changeEvent(payload, 0, PagerDutyService.createRetryDelayFn(maxRetries, stepDelay, maxDelay), timeUnit);
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                               final LongUnaryOperator retryDelayFn,
+                                                               final TimeUnit timeUnit) {
+    return changeEvent(payload, 0, retryDelayFn, timeUnit);
+  }
+
+  @Override
+  public CompletableFuture<PagerDutyEventResponse> changeEvent(final PagerDutyChangeEventPayload payload,
+                                                               final int retry,
+                                                               final LongUnaryOperator retryDelayFn,
+                                                               final TimeUnit timeUnit) {
+    final long retryDelay = retryDelayFn.applyAsLong(retry);
+    if (retryDelay < 0) {
+      return null;
+    }
+    final var responseFuture = client.defaultRouteChangeEvent(payload);
+    final Function<Throwable, CompletableFuture<PagerDutyEventResponse>> exceptionally = throwable -> {
+      final int numFailures = retry + 1;
+      logFailure(throwable, numFailures, retryDelay, timeUnit, String.format("to send change event:%n  %s", payload));
+      if (canBeRetried(throwable)) {
+        return changeEvent(payload, numFailures, retryDelayFn, timeUnit);
+      } else {
+        throw throwRuntimeException(throwable);
       }
     };
     if (retryDelay > 0) {
