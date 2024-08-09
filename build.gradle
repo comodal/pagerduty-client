@@ -24,11 +24,11 @@ buildscript {
     VERSION = getAppVersion()
     VCS_URL = 'https://github.com/comodal/pagerduty-client'
     // Used by systems.comodal.pagerduty_event_json_iterator_adapter
-    jsoniter = "2.10.+" // https://github.com/comodal/json-iterator/releases
+    jsoniter = "2.11.+" // https://github.com/comodal/json-iterator/releases
   }
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 21)
+final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 22)
 
 subprojects {
   apply plugin: 'java-library'
@@ -123,8 +123,8 @@ subprojects {
         name = "GitHubPackages"
         url = "https://maven.pkg.github.com/comodal/pagerduty-client"
         credentials {
-          username = System.getenv("GITHUB_ACTOR")
-          password = System.getenv("GITHUB_TOKEN")
+          username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user.write")
+          password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.token.write")
         }
       }
     }
