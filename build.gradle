@@ -28,7 +28,7 @@ buildscript {
   }
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 22)
+final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 23)
 
 subprojects {
   apply plugin: 'java-library'

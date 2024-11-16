@@ -14,6 +14,7 @@ import java.util.function.LongUnaryOperator;
 
 import static java.lang.String.format;
 import static java.lang.System.Logger.Level.ERROR;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
 record PagerDutyServiceVal(PagerDutyEventClient client,
@@ -188,7 +189,7 @@ record PagerDutyServiceVal(PagerDutyEventClient client,
       } else if (throwable.getCause() instanceof final RuntimeException runtimeException) {
         throw runtimeException;
       } else {
-        throw new RuntimeException(throwable.getCause() == null ? throwable : throwable.getCause());
+        throw new RuntimeException(requireNonNullElse(throwable.getCause(), throwable));
       }
     };
     if (retryDelay > 0) {
