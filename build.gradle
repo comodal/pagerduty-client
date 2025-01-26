@@ -1,34 +1,10 @@
-buildscript {
-  def getAppVersion = { ->
-    try (final var gitTagOut = new ByteArrayOutputStream()) {
-      exec {
-        commandLine 'git', 'tag', '--points-at', 'HEAD'
-        standardOutput = gitTagOut
-      }
-      final var tagName = gitTagOut.toString().strip()
-      if (tagName.isBlank()) {
-        try (final var gitHashOut = new ByteArrayOutputStream()) {
-          exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = gitHashOut
-          }
-          return 'git-' + gitHashOut.toString().strip()
-        }
-      } else {
-        return tagName
-      }
-    }
-  }
-
-  ext {
-    VERSION = getAppVersion()
-    VCS_URL = 'https://github.com/comodal/pagerduty-client'
-    // Used by systems.comodal.pagerduty_event_json_iterator_adapter
-    jsoniter = "2.11.+" // https://github.com/comodal/json-iterator/releases
-  }
+ext {
+  VERSION = project.findProperty('version')
+  VCS_URL = 'https://github.com/comodal/pagerduty-client'
+  jsoniter = "2.11.+" // https://github.com/comodal/json-iterator/releases
 }
 
-final JLV = JavaLanguageVersion.of(project.findProperty('targetJava') as Integer ?: 23)
+final JLV = JavaLanguageVersion.of(project.findProperty('javaVersion') as Integer ?: 23)
 
 subprojects {
   apply plugin: 'java-library'
@@ -44,6 +20,7 @@ subprojects {
   }
 
   project.group = 'systems.comodal'
+  project.version = "$VERSION"
 
   repositories {
     maven {
@@ -56,54 +33,42 @@ subprojects {
     mavenCentral()
   }
 
-  configurations.configureEach {
-    resolutionStrategy {
-      cacheDynamicVersionsFor 15, 'minutes'
-      cacheChangingModulesFor 15, 'minutes'
-    }
-  }
-
   dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:+'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:+'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:+'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.+'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   }
 
   test {
     useJUnitPlatform()
-    maxParallelForks = 4
     testLogging {
-      events "passed", "skipped", "failed", "standardOut", "standardError"
-      exceptionFormat "full"
-      showStandardStreams true
+      events "skipped", "failed", "standardOut", "standardError"
+      exceptionFormat = "full"
+      showStandardStreams = true
     }
   }
 
-  tasks.register('sourcesJar', Jar) {
-    from sourceSets.main.allJava
-    archiveClassifier.set('sources')
-  }
-
-  tasks.register('javadocJar', Jar) {
-    from javadoc
-    archiveClassifier.set('javadoc')
+  java {
+    withJavadocJar()
+    withSourcesJar()
   }
 
   javadoc {
     options.addBooleanOption('html5', true)
+    options.addStringOption('Xdoclint:none', '-quiet')
   }
 
   publishing {
     publications {
       mavenJava(MavenPublication) {
         from components.java
-        artifact sourcesJar
-        artifact javadocJar
-        groupId project.group
-        artifactId project.name
-        version = "$VERSION"
+
+        groupId = project.group
+        artifactId = project.name
+        version = project.version
+
         pom {
           name = project.name
+          description = "PagerDuty Event Client"
           url = "$VCS_URL"
           licenses {
             license {
@@ -111,13 +76,22 @@ subprojects {
               url = 'https://github.com/comodal/pagerduty-client/blob/master/LICENSE'
             }
           }
+          developers {
+            developer {
+              id = 'jpe42'
+              organization = 'Comodal Systems'
+              organizationUrl = 'https://github.com/comodal'
+            }
+          }
           scm {
             connection = 'scm:git:git@github.com:comodal/pagerduty-client.git'
+            developerConnection = 'scm:git:ssh@github.com:comodal/pagerduty-client.git'
             url = "$VCS_URL"
           }
         }
       }
     }
+
     repositories {
       maven {
         name = "GitHubPackages"
