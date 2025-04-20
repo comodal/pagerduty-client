@@ -1,7 +1,7 @@
 ext {
   VERSION = project.findProperty('version')
   VCS_URL = 'https://github.com/comodal/pagerduty-client'
-  jsoniter = "2.11.+" // https://github.com/comodal/json-iterator/releases
+  jsoniter = "2.13.+" // https://github.com/comodal/json-iterator/releases
 }
 
 final JLV = JavaLanguageVersion.of(project.findProperty('javaVersion') as Integer ?: 24)
@@ -35,7 +35,7 @@ subprojects {
 
   dependencies {
     // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.+'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   }
 
